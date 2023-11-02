@@ -31,10 +31,12 @@
 
 - $TL=20\lg r+\alpha r$ *尤里克P141, 近距离范围内浅海传播损失*
   - $\alpha=1.0936\times(\frac{0.1f^2}{1+f^2}+\frac{40f^2}{4100+f^2}+2.75\times10^{-4}f^2+0.003)$ *尤里克P85, 低频段吸收系数经验公式 (Thorp)* ==针对4度, 3000英尺约为914.4m处==
-  
-- $TS$<img src="README/image-20231026215022847.png" alt="image-20231026215022847"  />凸面, 大球, 有限任意平板<img src="README/image-20231026215047488.png" alt="image-20231026215047488"  />
 
-- $NL=10\lg f^{-1.7}+6S+55+10\lg B$ *刘伯胜P249公式7.20c用海况表示的浅海噪声谱级*
+- $TS$: 凸面, 大球, 有限任意平板
+
+  <img src="README/image-20231026215022847.png" alt="image-20231026215022847"  />
+
+- $NL=10\lg f^{-1.7}+6S+55+10\lg B$ *刘伯胜P249公式7.20c用海况表示的浅海噪声谱级 (加上带内噪声)*
 
 - DI=
 
@@ -64,5 +66,6 @@
 - [Material UI组件示例](https://flutter.github.io/samples/web/material_3_demo/)
 - [数学公式渲染包](https://pub.dev/packages/flutter_math_fork)
 - [找第三方包网站](https://fluttergems.dev/)
+- ["将状态维护在父部件, 子部件调用接收自父部件的句柄"方式实现参考](https://flutter.cn/docs/ui#bringing-it-all-together)
 - [TabBar class](https://api.flutter.dev/flutter/material/TabBar-class.html)
 - [动画图标](https://api.flutter.dev/flutter/material/AnimatedIcon-class.html)
