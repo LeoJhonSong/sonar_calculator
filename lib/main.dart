@@ -119,7 +119,7 @@ class TermWidget extends StatelessWidget {
     List<List<TextEditingController>> paramValueControllers = [
       for (Definition d in definitions) [for (String param in d.params.keys) TextEditingController()..text = (d.params[param]!).toString()]
     ];
-    final int maxParamLen = [for (Definition d in definitions) d.params.length].reduce((curr, next) => curr > next ? curr : next);
+    final int maxParamLen = [for (Definition d in definitions) d.params.length].reduce((current, next) => current > next ? current : next);
 
     return Flexible(
       child: Column(
