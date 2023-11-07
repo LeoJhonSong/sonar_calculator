@@ -372,11 +372,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _handleSolve(String name) {
     setState(() {
-      //FIXME: 先检查其他项填值没有
       double sum = 0.0;
       for (var i = 0; i < _terms.length; i++) {
         if (_terms.keys.elementAt(i) != name) {
-          sum = sum + _terms.values.elementAt(i).value;
+          sum = sum + _terms.values.elementAt(i).weight * _terms.values.elementAt(i).value;
         }
       }
       _terms[name]!.value = -sum / _terms[name]!.weight;
