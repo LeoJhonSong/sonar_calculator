@@ -256,9 +256,9 @@ class _MyHomePageState extends State<MyHomePage> {
         Definition.byParamNames(
             eqn: r'S_v+20\lg v',
             desc: '',
-            paramNames: ['v', 'Sv'],
-            func: (params) => params['Sv']! + 20 * log10(params['v']!),
-            inv: (result, params) => pow(10, (result - params['Sv']!) / 20).toDouble())
+            paramNames: ['v', r'S_v'],
+            func: (params) => params[r'S_v']! + 20 * log10(params['v']!),
+            inv: (result, params) => pow(10, (result - params[r'S_v']!) / 20).toDouble())
       ]),
       'TL': Term(name: 'TL', weight: -2.0, definitions: [
         Definition.byParamNames(
@@ -278,9 +278,9 @@ class _MyHomePageState extends State<MyHomePage> {
         Definition(
             eqn: r'\frac{a_1a_2}{4}',
             desc: '凸面',
-            params: {'a1': 1.0, 'a2': 1.0},
-            func: (params) => params['a1']! * params['a2']! / 4,
-            inv: (result, params) => 4 * result / params['a2']!),
+            params: {r'a_1': 1.0, r'a_2': 1.0},
+            func: (params) => params[r'a_1']! * params[r'a_2']! / 4,
+            inv: (result, params) => 4 * result / params[r'a_2']!),
         Definition.byParamNames(
             eqn: r'\frac{a^2}{4}',
             desc: '大球',
