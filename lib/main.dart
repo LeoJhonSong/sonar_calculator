@@ -86,7 +86,7 @@ class DefinitionCard extends StatelessWidget {
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    // TODO: onChanged: ,
+                    // TODO: onSubmitted: ,
                   ),
                 )
             ],
@@ -196,7 +196,7 @@ class TermWidget extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8), // Set your desired radius
                       ),
                     ),
-                    onChanged: (value) {
+                    onSubmitted: (value) {
                       if (value.isNotEmpty) {
                         onSetValue(name, double.parse(value));
                       }
