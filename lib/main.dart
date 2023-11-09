@@ -241,15 +241,18 @@ class TermWidget extends StatelessWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double f = 0;
-  double c = 0;
-  double B = 0;
-  double t = 0;
+  bool isPassive = true;
+  Map<String, double> knownParams = {
+    'f': 0,
+    'c': 0,
+    'B': 0,
+    't': 0,
+  };
   double alpha = 0;
   late Map<String, Term> _terms;
 
   _MyHomePageState() {
-    double f2 = pow(f, 2).toDouble();
+    double f2 = pow(knownParams['f']!, 2).toDouble();
     alpha = 1.0936 * ((0.1 * f2 / (1 + f2)) + (40 * f2 / (4100 + f2)) + 2.75e-4 * f2 + 0.003);
     _terms = {
       'SL': Term(name: 'SL', weight: 1.0, definitions: [
@@ -291,16 +294,16 @@ class _MyHomePageState extends State<MyHomePage> {
             eqn: r'(\frac{A}{\lambda})^2',
             desc: '有限任意形状平板',
             paramNames: ['A'],
-            func: (params) => pow(params['A']! * f / c, 2).toDouble(),
-            inv: (result, params) => pow(result, 0.5) * c / f),
+            func: (params) => pow(params['A']! * knownParams['f']! / knownParams['c']!, 2).toDouble(),
+            inv: (result, params) => pow(result, 0.5) * knownParams['c']! / knownParams['f']!),
       ]),
       'NL': Term(name: 'NL', weight: -1.0, definitions: [
         Definition.byParamNames(
             eqn: r'10\lg f^{-1.7}+6S+55+10\lg B',
             desc: '根据海况',
             paramNames: ['S'],
-            func: (params) => 10 * log10(pow(f, -1.7)) + 6 * params['S']! + 55 + 10 * log10(B),
-            inv: (result, params) => ((result - 10 * log10(pow(f, -1.7)) - 55 - 10 * log10(B)) ~/ 6).toDouble())
+            func: (params) => 10 * log10(pow(knownParams['f']!, -1.7)) + 6 * params['S']! + 55 + 10 * log10(knownParams['B']!),
+            inv: (result, params) => ((result - 10 * log10(pow(knownParams['f']!, -1.7)) - 55 - 10 * log10(knownParams['B']!)) ~/ 6).toDouble())
       ]),
       'DI': Term(name: 'DI', weight: 1.0, definitions: [
         Definition(
@@ -319,34 +322,35 @@ class _MyHomePageState extends State<MyHomePage> {
             eqn: r'20\lg\frac{\pi D}{\lambda}',
             desc: '圆形活塞阵',
             params: {'D': 1.0},
-            func: (params) => 20 * log10(pi * params['D']! * f / c),
-            inv: (result, params) => pow(10, result / 20) * c / f / pi),
+            func: (params) => 20 * log10(pi * params['D']! * knownParams['f']! / knownParams['c']!),
+            inv: (result, params) => pow(10, result / 20) * knownParams['c']! / knownParams['f']! / pi),
         Definition(
             eqn: r'10\lg\frac{4\pi S}{\lambda^2}',
             desc: '矩形活塞阵',
             params: {'S': 1.0},
-            func: (params) => 10 * log10(4 * pi * params['S']! / pow(f / c, 2)),
-            inv: (result, params) => pow(10, result / 10) * pow(c / f, 2) / 4 / pi),
+            func: (params) => 10 * log10(4 * pi * params['S']! / pow(knownParams['f']! / knownParams['c']!, 2)),
+            inv: (result, params) => pow(10, result / 10) * pow(knownParams['c']! / knownParams['f']!, 2) / 4 / pi),
       ]),
       'DT': Term(name: 'DT', weight: -1.0, definitions: [
         Definition(
             eqn: r'10\lg\frac{d}{2t}',
             desc: '互相关接收机',
             params: {'d': 1.0},
-            func: (params) => 10 * log10(params['d']! / 2 / t),
-            inv: (result, params) => pow(10, result / 10) * 2 * t),
+            func: (params) => 10 * log10(params['d']! / 2 / knownParams['t']!),
+            inv: (result, params) => pow(10, result / 10) * 2 * knownParams['t']!),
         Definition(
             eqn: r'5\lg\frac{d B}{t}',
             desc: '平方律检测器',
             params: {'d': 1.0},
-            func: (params) => 5 * log10(params['d']! * B / t),
-            inv: (result, params) => pow(10, result / 5) * t / B),
+            func: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!),
+            inv: (result, params) => pow(10, result / 5) * knownParams['t']! / knownParams['B']!),
         Definition(
             eqn: r'5\lg\frac{d B}{t}+|5\lg\frac{T}{t}|',
             desc: '平滑滤波器',
             params: {'d': 1.0, 'T': 1.0},
-            func: (params) => 5 * log10(params['d']! * B / t) + (5 * log10(params['T']! / t)).abs(),
-            inv: (result, params) => pow(10, (result - (5 * log10(params['T']! / t)).abs()) / 5) * t / B)
+            func: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!) + (5 * log10(params['T']! / knownParams['t']!)).abs(),
+            inv: (result, params) =>
+                pow(10, (result - (5 * log10(params['T']! / knownParams['t']!)).abs()) / 5) * knownParams['t']! / knownParams['B']!)
       ]),
     };
   }
@@ -363,6 +367,54 @@ class _MyHomePageState extends State<MyHomePage> {
               Text(
                 '声呐方程计算器',
                 style: Theme.of(context).textTheme.displayLarge,
+              ),
+              const SizedBox(
+                height: 40,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isPassive ? '主动' : '被动',
+                    style: Theme.of(context).textTheme.displaySmall,
+                  ),
+                  Switch(
+                    value: isPassive,
+                    onChanged: (value) {
+                      setState(() {
+                        isPassive = value;
+                      });
+                    },
+                  ),
+                  // 设置f, c, B, t
+                  for (String paramName in knownParams.keys)
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: SizedBox(
+                        width: 100,
+                        child: TextField(
+                          controller: TextEditingController()..text = knownParams[paramName]!.toString(),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Theme.of(context).colorScheme.outlineVariant,
+                            label: Math.tex(paramName, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(8), // Set your desired radius
+                            ),
+                          ),
+                          onSubmitted: (value) {
+                            if (value.isNotEmpty) {
+                              setState(() {
+                                knownParams[paramName] = double.parse(value);
+                              });
+                            }
+                          },
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               Expanded(
                 child: Center(
