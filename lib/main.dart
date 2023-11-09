@@ -4,45 +4,17 @@ import 'package:equations/equations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
+import 'color_schemes.g.dart';
+
 void main() {
   runApp(MaterialApp(
     title: '声呐方程计算器',
-    theme: ThemeData(
+    theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme
+        // TODO: 适配高分屏缩放
+        ),
+    darkTheme: ThemeData(
       useMaterial3: true,
-      colorScheme: const ColorScheme(
-        brightness: Brightness.dark,
-        primary: Color(0xFFC3C0FF),
-        onPrimary: Color(0xFF221693),
-        primaryContainer: Color(0xFF3A34A9),
-        onPrimaryContainer: Color(0xFFE2DFFF),
-        secondary: Color(0xFFBEC2FF),
-        onSecondary: Color(0xFF1F2578),
-        secondaryContainer: Color(0xFF373E90),
-        onSecondaryContainer: Color(0xFFE0E0FF),
-        tertiary: Color(0xFF57D6F6),
-        onTertiary: Color(0xFF003641),
-        tertiaryContainer: Color(0xFF004E5E),
-        onTertiaryContainer: Color(0xFFB0ECFF),
-        error: Color(0xFFFFB4AB),
-        errorContainer: Color(0xFF93000A),
-        onError: Color(0xFF690005),
-        onErrorContainer: Color(0xFFFFDAD6),
-        background: Color(0xFF001B3D),
-        onBackground: Color(0xFFD6E3FF),
-        surface: Color(0xFF001B3D),
-        onSurface: Color(0xFFD6E3FF),
-        surfaceVariant: Color(0xFF47464F),
-        onSurfaceVariant: Color(0xFFC8C5D0),
-        outline: Color(0xFF928F9A),
-        onInverseSurface: Color(0xFF001B3D),
-        inverseSurface: Color(0xFFD6E3FF),
-        inversePrimary: Color(0xFF534FC2),
-        shadow: Color(0xFF000000),
-        surfaceTint: Color(0xFFC3C0FF),
-        outlineVariant: Color(0xFF47464F),
-        scrim: Color(0xFF000000),
-      ),
-      // TODO: 适配高分屏缩放
+      colorScheme: darkColorScheme,
     ),
     home: const MyHomePage(),
     debugShowCheckedModeBanner: false,
@@ -61,6 +33,89 @@ class Definition {
 
   Definition.byParamNames({required this.eqn, required this.desc, required List<String> paramNames, required this.func, required this.inv})
       : params = {for (String paramName in paramNames) paramName: 0.0};
+}
+
+class DefinitionCard extends StatelessWidget {
+  final TextPainter textPainter;
+
+  final int maxParamLen;
+  final List<Definition> definitions;
+  final int definitionIdx;
+  final List<List<TextEditingController>> paramValueControllers;
+  const DefinitionCard({
+    super.key,
+    required this.textPainter,
+    required this.maxParamLen,
+    required this.definitions,
+    required this.definitionIdx,
+    required this.paramValueControllers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.surfaceVariant,
+      surfaceTintColor: Theme.of(context).colorScheme.outline,
+      child: ListTile(
+        minVerticalPadding: 15,
+        horizontalTitleGap: 0, // 减小leading和title之间的间距
+        leading: SizedBox(
+          width: textPainter.width * 8 * maxParamLen,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // TextFields for each param in definitions[i]
+              for (int j = 0; j < definitions[definitionIdx].params.keys.length; j++)
+                Container(
+                  margin: EdgeInsets.only(right: textPainter.width * 0.8),
+                  width: textPainter.width * 7,
+                  child: TextField(
+                    controller: paramValueControllers[definitionIdx][j],
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.outlineVariant,
+                      label: SizedBox(
+                          width: textPainter.width * 2.5,
+                          child: Math.tex(definitions[definitionIdx].params.keys.elementAt(j),
+                              textStyle: TextStyle(color: Theme.of(context).colorScheme.primary))),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(8), // Set your desired radius
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    // TODO: onChanged: ,
+                  ),
+                )
+            ],
+          ),
+        ),
+        title: Tooltip(
+            preferBelow: false,
+            message: definitions[definitionIdx].desc,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: ElevatedButton(
+                  onPressed: () => 0,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    elevation: 3,
+                    foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Math.tex(definitions[definitionIdx].eqn,
+                            mathStyle: MathStyle.display, textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface))),
+                  )),
+            )),
+      ),
+    );
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -125,38 +180,44 @@ class TermWidget extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Card(
-            color: Theme.of(context).colorScheme.tertiaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: textPainter.width * 8,
-                    child: TextField(
-                      controller: termValueController,
-                      decoration: null,
-                      onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          onSetValue(name, double.parse(value));
-                        }
-                      },
-                      textAlign: TextAlign.center,
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: textPainter.width * 8,
+                  child: TextField(
+                    controller: termValueController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.outlineVariant,
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(8), // Set your desired radius
+                      ),
                     ),
+                    onChanged: (value) {
+                      if (value.isNotEmpty) {
+                        onSetValue(name, double.parse(value));
+                      }
+                    },
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () => onSolve(name),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-                      foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 3,
-                    ),
-                    child: Text(name, style: Theme.of(context).textTheme.displayMedium),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () => onSolve(name),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 3,
                   ),
-                ],
-              ),
+                  child: Text(name,
+                      style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          )),
+                ),
+              ],
             ),
           ),
           Flexible(
@@ -164,48 +225,12 @@ class TermWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 for (int i = 0; i < definitions.length; i++)
-                  Card(
-                    // TODO: 提取为单独的widget
-                    child: ListTile(
-                      horizontalTitleGap: 0,
-                      leading: SizedBox(
-                        width: textPainter.width * 8 * maxParamLen,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // TextFields for each param in definitions[i]
-                            for (int j = 0; j < definitions[i].params.keys.length; j++)
-                              SizedBox(
-                                width: textPainter.width * 8,
-                                child: TextField(
-                                  controller: paramValueControllers[i][j],
-                                  decoration: InputDecoration(
-                                    prefix: SizedBox(width: textPainter.width * 2.5, child: Math.tex(definitions[i].params.keys.elementAt(j))),
-                                    border: InputBorder.none,
-                                  ),
-                                  // TODO: onChanged: ,
-                                ),
-                              )
-                          ],
-                        ),
-                      ),
-                      title: Tooltip(
-                          message: definitions[i].desc,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: ElevatedButton(
-                                onPressed: () => 0,
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                                  elevation: 3,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                  child: FittedBox(fit: BoxFit.scaleDown, child: Math.tex(definitions[i].eqn, mathStyle: MathStyle.display)),
-                                )),
-                          )),
-                    ),
-                  ),
+                  DefinitionCard(
+                      textPainter: textPainter,
+                      maxParamLen: maxParamLen,
+                      definitions: definitions,
+                      definitionIdx: i,
+                      paramValueControllers: paramValueControllers),
               ],
             ),
           ),
@@ -330,7 +355,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Theme.of(context).colorScheme.background,
+        color: Theme.of(context).colorScheme.surfaceVariant,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
