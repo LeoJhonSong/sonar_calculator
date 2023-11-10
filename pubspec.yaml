@@ -33,6 +33,7 @@ dependencies:
     sdk: flutter
   equations: '>=5.0.2 <6.0.0'
   flutter_math_fork: '>=0.7.0 <0.7.1'
+  just_the_tooltip: ^0.0.12
 
 
   # The following adds the Cupertino Icons font to your application.

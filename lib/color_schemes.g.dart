@@ -59,7 +59,6 @@ const darkColorScheme = ColorScheme(
   inverseSurface: Color(0xFFE0E3E1),
   inversePrimary: Color(0xFF006B5E),
   shadow: Color(0xFF000000),
-  // surfaceTint: Color(0xFF55DBC6),
   surfaceTint: Color(0xFFACCAE5),
   outlineVariant: Color(0xFF333534),
   scrim: Color(0xFF000000),

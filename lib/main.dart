@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:equations/equations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
+import 'package:just_the_tooltip/just_the_tooltip.dart';
 
 import 'color_schemes.g.dart';
 
@@ -53,66 +54,50 @@ class DefinitionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceVariant,
-      surfaceTintColor: Theme.of(context).colorScheme.outline,
-      child: ListTile(
-        minVerticalPadding: 15,
-        horizontalTitleGap: 0, // 减小leading和title之间的间距
-        leading: SizedBox(
-          width: textPainter.width * 8 * maxParamLen,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // TextFields for each param in definitions[i]
-              for (int j = 0; j < definitions[definitionIdx].params.keys.length; j++)
-                Container(
-                  margin: EdgeInsets.only(right: textPainter.width * 0.8),
-                  width: textPainter.width * 7,
-                  child: TextField(
-                    controller: paramValueControllers[definitionIdx][j],
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.outlineVariant,
-                      label: SizedBox(
-                          width: textPainter.width * 2.5,
-                          child: Math.tex(definitions[definitionIdx].params.keys.elementAt(j),
-                              textStyle: TextStyle(color: Theme.of(context).colorScheme.primary))),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(8), // Set your desired radius
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    // TODO: onSubmitted: ,
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        children: [
+          // TextFields for each param in definitions[i]
+          for (int j = 0; j < definitions[definitionIdx].params.keys.length; j++)
+            Container(
+              margin: EdgeInsets.only(right: textPainter.width * 0.8),
+              width: textPainter.width * 7,
+              child: TextField(
+                controller: paramValueControllers[definitionIdx][j],
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.outlineVariant,
+                  label: SizedBox(
+                      width: textPainter.width * 2.5,
+                      child: Math.tex(definitions[definitionIdx].params.keys.elementAt(j),
+                          textStyle: TextStyle(color: Theme.of(context).colorScheme.primary))),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(8), // Set your desired radius
                   ),
-                )
-            ],
-          ),
-        ),
-        title: Tooltip(
-            preferBelow: false,
-            message: definitions[definitionIdx].desc,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: ElevatedButton(
+                ),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                // TODO: onSubmitted: ,
+              ),
+            ),
+          const Spacer(),
+          JustTheTooltip(
+              preferredDirection: AxisDirection.right,
+              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+              content: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Math.tex(definitions[definitionIdx].eqn, textStyle: TextStyle(color: Theme.of(context).colorScheme.onTertiaryContainer)),
+              ),
+              child: FloatingActionButton.extended(
                   onPressed: () => 0,
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                    elevation: 3,
-                    foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
-                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Math.tex(definitions[definitionIdx].eqn,
-                            mathStyle: MathStyle.display, textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface))),
-                  )),
-            )),
+                  elevation: 3,
+                  foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
+                  backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                  label: Text(definitions[definitionIdx].desc))),
+        ],
       ),
     );
   }
@@ -221,17 +206,28 @@ class TermWidget extends StatelessWidget {
             ),
           ),
           Flexible(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (int i = 0; i < definitions.length; i++)
-                  DefinitionCard(
-                      textPainter: textPainter,
-                      maxParamLen: maxParamLen,
-                      definitions: definitions,
-                      definitionIdx: i,
-                      paramValueControllers: paramValueControllers),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                color: Theme.of(context).colorScheme.surfaceVariant,
+                surfaceTintColor: Theme.of(context).colorScheme.surfaceVariant,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int i = 0; i < definitions.length; i++)
+                      DefinitionCard(
+                          textPainter: textPainter,
+                          maxParamLen: maxParamLen,
+                          definitions: definitions,
+                          definitionIdx: i,
+                          paramValueControllers: paramValueControllers),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -258,15 +254,15 @@ class _MyHomePageState extends State<MyHomePage> {
       'SL': Term(name: 'SL', weight: 1.0, definitions: [
         Definition.byParamNames(
             eqn: r'S_v+20\lg v',
-            desc: '',
-            paramNames: ['v', r'S_v'],
-            func: (params) => params[r'S_v']! + 20 * log10(params['v']!),
-            inv: (result, params) => pow(10, (result - params[r'S_v']!) / 20).toDouble())
+            desc: '由发射电压',
+            paramNames: ['v', 'S_v'],
+            func: (params) => params['S_v']! + 20 * log10(params['v']!),
+            inv: (result, params) => pow(10, (result - params['S_v']!) / 20).toDouble())
       ]),
       'TL': Term(name: 'TL', weight: -2.0, definitions: [
         Definition.byParamNames(
             eqn: r'20\lg r+\alpha r',
-            desc: '',
+            desc: '浅海传播损失',
             paramNames: ['r'],
             func: (params) => 20 * log10(params['r']!) + alpha * params['r']!,
             inv: (result, params) {
@@ -281,9 +277,9 @@ class _MyHomePageState extends State<MyHomePage> {
         Definition(
             eqn: r'\frac{a_1a_2}{4}',
             desc: '凸面',
-            params: {r'a_1': 1.0, r'a_2': 1.0},
-            func: (params) => params[r'a_1']! * params[r'a_2']! / 4,
-            inv: (result, params) => 4 * result / params[r'a_2']!),
+            params: {'a_1': 1.0, 'a_2': 1.0},
+            func: (params) => params['a_1']! * params['a_2']! / 4,
+            inv: (result, params) => 4 * result / params['a_2']!),
         Definition.byParamNames(
             eqn: r'\frac{a^2}{4}',
             desc: '大球',
@@ -300,7 +296,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'NL': Term(name: 'NL', weight: -1.0, definitions: [
         Definition.byParamNames(
             eqn: r'10\lg f^{-1.7}+6S+55+10\lg B',
-            desc: '根据海况',
+            desc: '由海况',
             paramNames: ['S'],
             func: (params) => 10 * log10(pow(knownParams['f']!, -1.7)) + 6 * params['S']! + 55 + 10 * log10(knownParams['B']!),
             inv: (result, params) => ((result - 10 * log10(pow(knownParams['f']!, -1.7)) - 55 - 10 * log10(knownParams['B']!)) ~/ 6).toDouble())
