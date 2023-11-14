@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:equations/equations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
@@ -21,6 +22,14 @@ void main() {
     home: const MyHomePage(),
     debugShowCheckedModeBanner: false,
   ));
+
+  doWhenWindowReady(() {
+    const initialSize = Size(2000, 1000);
+    appWindow.minSize = initialSize;
+    appWindow.size = initialSize;
+    appWindow.alignment = Alignment.center;
+    appWindow.show();
+  });
 }
 
 double log10(num x) => log(x) / ln10;
@@ -30,6 +39,24 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class WindowButtons extends StatelessWidget {
+  const WindowButtons({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        MinimizeWindowButton(colors: WindowButtonColors(iconNormal: Theme.of(context).colorScheme.outline)),
+        MaximizeWindowButton(colors: WindowButtonColors(iconNormal: Theme.of(context).colorScheme.outline)),
+        CloseWindowButton(
+            colors: WindowButtonColors(
+          iconNormal: Theme.of(context).colorScheme.outline,
+          mouseOver: Theme.of(context).colorScheme.errorContainer,
+        )),
+      ],
+    );
+  }
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -150,79 +177,115 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Container(
-        color: Theme.of(context).colorScheme.surfaceVariant,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.2), //边框颜色
+            width: 1, //边框宽度
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withOpacity(0.3),
+              blurRadius: 10,
+              spreadRadius: 0.5,
+            ),
+          ],
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15),
           child: Column(
             children: [
-              Text(
-                '声呐方程计算器',
-                style: Theme.of(context).textTheme.displayLarge,
-              ),
-              const SizedBox(
-                height: 40,
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    isPassive ? '主动' : '被动',
-                    style: Theme.of(context).textTheme.displaySmall,
-                  ),
-                  Switch(
-                    value: isPassive,
-                    onChanged: (value) {
-                      setState(() {
-                        isPassive = value;
-                      });
-                    },
-                  ),
-                  // 设置f, c, B, t
-                  for (String paramName in knownParams.keys)
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: SizedBox(
-                        width: 100,
-                        child: TextField(
-                          controller: TextEditingController()..text = knownParams[paramName]!.toString(),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.outlineVariant,
-                            label: Math.tex(paramName, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(8), // Set your desired radius
-                            ),
-                          ),
-                          onSubmitted: (value) {
-                            if (value.isNotEmpty) {
-                              setState(() {
-                                knownParams[paramName] = double.parse(value);
-                              });
-                            }
-                          },
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
+              WindowTitleBarBox(
+                child: Row(
+                  children: [
+                    Expanded(child: Material(color: Theme.of(context).colorScheme.surfaceVariant, child: MoveWindow())),
+                    const WindowButtons(),
+                  ],
+                ),
               ),
               Expanded(
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (var i = 0; i < _terms.length; i++)
-                        TermWidget(
-                          name: _terms.values.elementAt(i).name,
-                          value: _terms.values.elementAt(i).value,
-                          onSolve: _handleSolve,
-                          onSetValue: _handleSetValue,
-                          definitions: _terms.values.elementAt(i).definitions,
+                child: Material(
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          '声呐方程计算器',
+                          style: Theme.of(context).textTheme.displayLarge,
                         ),
-                    ],
+                        const SizedBox(
+                          height: 40,
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isPassive ? '主动' : '被动',
+                              style: Theme.of(context).textTheme.displaySmall,
+                            ),
+                            Switch(
+                              value: isPassive,
+                              onChanged: (value) {
+                                setState(() {
+                                  isPassive = value;
+                                });
+                              },
+                            ),
+                            // 设置f, c, B, t
+                            for (String paramName in knownParams.keys)
+                              Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: SizedBox(
+                                  width: 100,
+                                  child: TextField(
+                                    controller: TextEditingController()..text = knownParams[paramName]!.toString(),
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.outlineVariant,
+                                      label: Math.tex(paramName, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                        borderRadius: BorderRadius.circular(8), // Set your desired radius
+                                      ),
+                                    ),
+                                    onSubmitted: (value) {
+                                      if (value.isNotEmpty) {
+                                        setState(() {
+                                          knownParams[paramName] = double.parse(value);
+                                        });
+                                      }
+                                    },
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (var i = 0; i < _terms.length; i++)
+                                  TermWidget(
+                                    name: _terms.values.elementAt(i).name,
+                                    value: _terms.values.elementAt(i).value,
+                                    onSolve: _handleSolve,
+                                    onSetValue: _handleSetValue,
+                                    definitions: _terms.values.elementAt(i).definitions,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

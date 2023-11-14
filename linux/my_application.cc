@@ -1,3 +1,4 @@
+#include <bitsdojo_window_linux/bitsdojo_window_plugin.h>
 #include "my_application.h"
 
 #include <flutter_linux/flutter_linux.h>
@@ -47,14 +48,16 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "sonar_calculator");
   }
 
-  gtk_window_set_default_size(window, 1280, 720);
-  gtk_widget_show(GTK_WIDGET(window));
+  auto bdw = bitsdojo_window_from(window);            // <--- add this line
+  bdw->setCustomFrame(true);                          // <-- add this line
+  //gtk_window_set_default_size(window, 1280, 720);   // <-- comment this line
+  // gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
 
   FlView* view = fl_view_new(project);
-  gtk_widget_show(GTK_WIDGET(view));
+  // gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));

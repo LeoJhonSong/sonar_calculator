@@ -63,7 +63,6 @@
 - [Flutter中文文档](https://flutter.cn/docs/)
 - [Flutter换官方源](https://flutter.cn/community/china) [换清华源](https://help.mirrors.cernet.edu.cn/flutter/)
 - [Material UI组件示例](https://flutter.github.io/samples/web/material_3_demo/)
-- [找第三方包网站](https://fluttergems.dev/)
 - ["将状态维护在父部件, 子部件调用接收自父部件的句柄"方式实现参考](https://flutter.cn/docs/ui#bringing-it-all-together)
 - [动画图标](https://api.flutter.dev/flutter/material/AnimatedIcon-class.html)
 - [FittedBox](https://book.flutterchina.club/chapter5/fittedbox.html#_5-6-2-%E5%AE%9E%E4%BE%8B-%E5%8D%95%E8%A1%8C%E7%BC%A9%E6%94%BE%E5%B8%83%E5%B1%80)
@@ -73,6 +72,9 @@
 
 ### 第三方包
 
+- [找第三方包网站](https://fluttergems.dev/)
 - [用equations库解方程](https://pub.dev/packages/equations#nonlinear-equations), [测试求解式用网站](https://albertodev01.github.io/equations/)
 - [数学公式渲染包](https://pub.dev/packages/flutter_math_fork)
 - [支持提示为widget的tooltip](https://pub.dev/packages/just_the_tooltip)
+- [自定义窗口样式](https://pub.dev/packages/bitsdojo_window)
+- [透明背景色支持](https://pub.dev/packages/flutter_acrylic) **Linux下不支持亚克力效果**
