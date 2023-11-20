@@ -87,7 +87,6 @@ class TermWidget extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 3,
                   ),
                   child: Text(name,
                       style: Theme.of(context).textTheme.displayMedium!.copyWith(

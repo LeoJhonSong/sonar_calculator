@@ -71,7 +71,6 @@ class DefinitionCard extends StatelessWidget {
               ),
               child: FloatingActionButton.extended(
                   onPressed: () => 0,
-                  elevation: 3,
                   foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
                   backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
                   label: Text(definitions[definitionIdx].desc))),

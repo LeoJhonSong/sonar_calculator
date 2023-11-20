@@ -66,9 +66,10 @@
 - ["将状态维护在父部件, 子部件调用接收自父部件的句柄"方式实现参考](https://flutter.cn/docs/ui#bringing-it-all-together)
 - [动画图标](https://api.flutter.dev/flutter/material/AnimatedIcon-class.html)
 - [FittedBox](https://book.flutterchina.club/chapter5/fittedbox.html#_5-6-2-%E5%AE%9E%E4%BE%8B-%E5%8D%95%E8%A1%8C%E7%BC%A9%E6%94%BE%E5%B8%83%E5%B1%80)
-- [设计Material3配色方案](https://www.figma.com/community/file/1248805263844976008/build-a-material-color-scheme) [效果演示](https://m3.material.io/theme-builder#/custom)
+- [设计Material3主题](https://rydmike.com/flexcolorscheme/themesplayground-latest/)
 - [Material color roles](https://m3.material.io/styles/color/roles), [详细演示](https://www.figma.com/community/file/1248805263844976008/build-a-material-color-scheme)
 - [Flutter屏幕适配](https://cloud.tencent.com/developer/article/2124383)
+- [常见Flutter错误](https://flutter.cn/docs/testing/common-errors)
 
 ### 第三方包
 
