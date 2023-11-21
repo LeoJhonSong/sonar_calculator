@@ -59,7 +59,7 @@ class TermWidget extends StatelessWidget {
 
     return Flexible(
       child: SizedBox(
-        width: 325,
+        width: 400, // TermWidget的最大宽度
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -107,23 +107,26 @@ class TermWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Card(
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 1),
+                    side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   color: Theme.of(context).colorScheme.surfaceVariant,
-                  surfaceTintColor: Theme.of(context).colorScheme.surfaceVariant,
+                  surfaceTintColor: Theme.of(context).colorScheme.surface,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (int defIdx = 0; defIdx < definitions.length; defIdx++)
-                        DefinitionCard(
-                          definitions: definitions,
-                          definitionIdx: defIdx,
-                          onCalcTermValue: () => onSetTermByDefIdx(name, defIdx),
-                          setDefParam: (paramName, value) => setDefParam(name, defIdx, paramName, value),
-                        ),
-                    ],
-                  ),
+                      mainAxisSize: MainAxisSize.min,
+                      children: ListTile.divideTiles(
+                        context: context,
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                        tiles: [
+                          for (int defIdx = 0; defIdx < definitions.length; defIdx++)
+                            DefinitionCard(
+                              definitions: definitions,
+                              definitionIdx: defIdx,
+                              onCalcTermValue: () => onSetTermByDefIdx(name, defIdx),
+                              setDefParam: (paramName, value) => setDefParam(name, defIdx, paramName, value),
+                            ),
+                        ],
+                      ).toList()),
                 ),
               ),
             ),

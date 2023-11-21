@@ -33,7 +33,6 @@ dependencies:
     sdk: flutter
   equations: '>=5.0.2 <6.0.0'
   flutter_math_fork: '>=0.7.0 <0.7.1'
-  just_the_tooltip: ^0.0.12
   bitsdojo_window: ^0.1.5
   flutter_acrylic: ^1.1.0
   toggle_switch: ^2.1.0

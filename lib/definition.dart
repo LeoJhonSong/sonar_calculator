@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
-import 'package:just_the_tooltip/just_the_tooltip.dart';
+import 'list_tile_reveal.dart';
 
 class Definition {
   String eqn;
@@ -33,58 +33,66 @@ class DefinitionCard extends StatelessWidget {
       for (String param in definitions[definitionIdx].params.keys)
         param: TextEditingController()..text = (definitions[definitionIdx].params[param]!).toString()
     };
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        children: [
-          // TextFields for each param in definitions[definitionIdx]
-          for (String param in definitions[definitionIdx].params.keys)
-            Container(
-              margin: const EdgeInsets.only(right: 10),
-              width: 70, // TODO: 输入框的宽度要想办法能动态
-              child: TextField(
-                controller: paramValueControllers[param],
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.outlineVariant,
-                  label: SizedBox(
-                    width: 20, // TODO: 参数名的字体肯定要变大, 这个宽度现在刚刚好, 所以肯定要变大
-                    child: Math.tex(param, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                  ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(8), // Set your desired radius
-                  ),
-                ),
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+    final scrollController = ScrollController();
+    return Column(
+      children: [
+        ListTileReveal(
+          title: Text(definitions[definitionIdx].desc),
+          subtitle: Scrollbar(
+            controller: scrollController,
+            scrollbarOrientation: ScrollbarOrientation.bottom,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              child: Math.tex(
+                definitions[definitionIdx].eqn,
+                textScaleFactor: 1.2, // TODO: 这个缩放比
+                textStyle: TextStyle(color: Theme.of(context).colorScheme.outline),
               ),
             ),
-          const Spacer(),
-          JustTheTooltip(
-              preferredDirection: AxisDirection.right,
-              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-              content: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Math.tex(definitions[definitionIdx].eqn, textStyle: TextStyle(color: Theme.of(context).colorScheme.onTertiaryContainer)),
-              ),
-              child: FloatingActionButton.extended(
-                  onPressed: () {
-                    // TODO: 这个按钮删掉, 用上面输入框的submit
-                    for (String param in definitions[definitionIdx].params.keys) {
-                      String value = paramValueControllers[param]!.text;
-                      if (value.isNotEmpty) {
-                        setDefParam(param, double.parse(value));
-                      }
-                    }
-                    onCalcTermValue();
-                  },
-                  foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
-                  backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                  label: Text(definitions[definitionIdx].desc))),
-        ],
-      ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(15),
+          child: Row(
+            children: () {
+              List<Widget> list = [
+                for (String param in definitions[definitionIdx].params.keys) ...[
+                  Expanded(
+                    child: TextField(
+                      controller: paramValueControllers[param],
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.outlineVariant,
+                        label: SizedBox(
+                          width: 20, // TODO: 参数名的字体肯定要变大, 这个宽度现在刚刚好, 所以肯定要变大
+                          child: Math.tex(param, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(8), // Set your desired radius
+                        ),
+                      ),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      onSubmitted: (value) {
+                        if (value.isNotEmpty) {
+                          setDefParam(param, double.parse(value));
+                        }
+                        onCalcTermValue();
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                ],
+              ];
+              return list.take(list.length - 1);
+            }()
+                .toList(),
+          ),
+        ),
+      ],
     );
   }
 }

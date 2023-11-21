@@ -143,7 +143,7 @@ class SettingsRow extends StatelessWidget {
               activeBgColor: [colorScheme.primaryContainer],
               activeFgColor: colorScheme.onPrimaryContainer,
               inactiveBgColor: colorScheme.outlineVariant,
-              inactiveFgColor: colorScheme.onSurface,
+              inactiveFgColor: colorScheme.inversePrimary,
               labels: const ['主动', '被动'],
               onToggle: (index) => onSetPassive(index == 0),
             ),
@@ -239,13 +239,13 @@ class _MyHomePageState extends State<MyHomePage> {
       ]),
       'TS': Term(name: 'TS', weight: 1.0, definitions: [
         Definition(
-            eqn: r'\frac{a_1a_2}{4}',
+            eqn: r'\frac{a_1a_2}{4}\left|\begin{aligned}a_1a_2&=主曲率半径\\r&=距离\\k&=波数\end{aligned}\right| \left.\begin{aligned}ka_1,ka_2&\gg1\\ r&>a\end{aligned}\right.',
             desc: '凸面',
             params: {'a_1': 1.0, 'a_2': 1.0},
             func: (params) => params['a_1']! * params['a_2']! / 4,
             inv: (result, params) => 4 * result / params['a_2']!),
         Definition.byParamNames(
-            eqn: r'\frac{a^2}{4}',
+            eqn: r'\frac{a^2}{4}, a=球半径',
             desc: '大球',
             paramNames: ['a'],
             func: (params) => pow(params['a']!, 2) / 4,
