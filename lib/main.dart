@@ -111,6 +111,76 @@ class ROCDialog extends StatelessWidget {
   }
 }
 
+class SettingsRow extends StatelessWidget {
+  final ColorScheme colorScheme;
+  final bool isPassive;
+  final Map<String, double> knownParams;
+  final void Function(bool isIndex0) onSetPassive;
+  final void Function(String paramName, double value) onSetParam;
+  const SettingsRow({
+    super.key,
+    required this.colorScheme,
+    required this.isPassive,
+    required this.knownParams,
+    required this.onSetPassive,
+    required this.onSetParam,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double paddingSize = 40;
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(right: paddingSize),
+            child: ToggleSwitch(
+              minHeight: 56,
+              initialLabelIndex: isPassive ? 0 : 1,
+              totalSwitches: 2,
+              activeBgColor: [colorScheme.primaryContainer],
+              activeFgColor: colorScheme.onPrimaryContainer,
+              inactiveBgColor: colorScheme.outlineVariant,
+              inactiveFgColor: colorScheme.onSurface,
+              labels: const ['主动', '被动'],
+              onToggle: (index) => onSetPassive(index == 0),
+            ),
+          ),
+          // 设置f, c, B, t
+          for (String paramName in knownParams.keys)
+            Padding(
+              padding: EdgeInsets.only(right: paddingSize),
+              child: SizedBox(
+                width: 100,
+                child: TextField(
+                  controller: TextEditingController()..text = knownParams[paramName]!.toString(),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.outlineVariant,
+                    label: Math.tex(paramName, textStyle: TextStyle(color: colorScheme.primary)),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(8), // Set your desired radius
+                    ),
+                  ),
+                  onSubmitted: (value) {
+                    if (value.isNotEmpty) {
+                      onSetParam(paramName, double.parse(value));
+                    }
+                  },
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          const ROCDialog(),
+        ],
+      ),
+    );
+  }
+}
+
 class WindowButtons extends StatelessWidget {
   const WindowButtons({super.key});
   @override
@@ -132,10 +202,11 @@ class WindowButtons extends StatelessWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool isPassive = true;
   Map<String, double> knownParams = {
-    'f': 0,
-    'c': 0,
-    'B': 0,
-    't': 0,
+    // FIXME: 目前是通过给定默认初值的方式避免出错的, 但还是加上输入框的判断禁止填非正数比较好, 很多输入框都需要
+    'f': 1,
+    'c': 1500,
+    'B': 1,
+    't': 1,
   };
   double alpha = 0;
   late Map<String, Term> _terms;
@@ -246,6 +317,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -298,54 +370,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Expanded(
                                   child: Align(
                                     alignment: const Alignment(0, 0.8),
-                                    child: Row( // TODO: 提取这个widget
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        ToggleSwitch(
-                                          minHeight: 56,
-                                          initialLabelIndex: 0,
-                                          totalSwitches: 2,
-                                          activeBgColor: [Theme.of(context).colorScheme.primaryContainer],
-                                          activeFgColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                                          inactiveBgColor: Theme.of(context).colorScheme.outlineVariant,
-                                          inactiveFgColor: Theme.of(context).colorScheme.onSurface,
-                                          labels: const ['主动', '被动'],
-                                          onToggle: (index) {
-                                            setState(() {
-                                              isPassive = index == 0;
-                                            });
-                                          },
-                                        ),
-                                        // 设置f, c, B, t
-                                        for (String paramName in knownParams.keys)
-                                          Padding(
-                                            padding: const EdgeInsets.all(20),
-                                            child: SizedBox(
-                                              width: 100,
-                                              child: TextField(
-                                                controller: TextEditingController()..text = knownParams[paramName]!.toString(),
-                                                decoration: InputDecoration(
-                                                  filled: true,
-                                                  fillColor: Theme.of(context).colorScheme.outlineVariant,
-                                                  label: Math.tex(paramName, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                                                  border: OutlineInputBorder(
-                                                    borderSide: BorderSide.none,
-                                                    borderRadius: BorderRadius.circular(8), // Set your desired radius
-                                                  ),
-                                                ),
-                                                onSubmitted: (value) {
-                                                  if (value.isNotEmpty) {
-                                                    setState(() {
-                                                      knownParams[paramName] = double.parse(value);
-                                                    });
-                                                  }
-                                                },
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-                                          ),
-                                        const ROCDialog(),
-                                      ],
+                                    child: SettingsRow(
+                                      colorScheme: colorScheme,
+                                      knownParams: knownParams,
+                                      isPassive: isPassive,
+                                      onSetParam: _handleSetParam,
+                                      onSetPassive: _handleSetPassive,
                                     ),
                                   ),
                                 ),
@@ -358,8 +388,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                         name: _terms.values.elementAt(i).name,
                                         value: _terms.values.elementAt(i).value,
                                         onSolve: _handleSolve,
-                                        onSetValue: _handleSetValue,
+                                        onSetValue: _handleSetTermValue,
                                         definitions: _terms.values.elementAt(i).definitions,
+                                        onSetTermByDefIdx: _handleSetTermByDefIdx,
+                                        setDefParam: _handleSetDefParam,
                                       ),
                                   ],
                                 ),
@@ -380,9 +412,43 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _handleSetValue(String name, double value) {
+  void _handleSetDefParam(String name, int defIdx, String paramName, double value) {
+    setState(() {
+      _terms[name]!.definitions[defIdx].params[paramName] = value;
+    });
+  }
+
+  void _handleSetParam(String paramName, double value) {
+    setState(() {
+      knownParams[paramName] = value;
+    });
+  }
+
+  void _handleSetPassive(bool isIndex0) {
+    setState(() {
+      isPassive = isIndex0;
+      // 在主动/被动声呐方程间切换
+      if (isPassive) {
+        _terms['TL']!.weight = -2;
+        _terms['TS']!.weight = 1;
+      } else {
+        _terms['TL']!.weight = -1;
+        _terms['TS']!.weight = 0;
+      }
+    });
+    // TODO: Color filtered TS列
+  }
+
+  void _handleSetTermByDefIdx(String name, int defIdx) {
+    setState(() {
+      _terms[name]!.calcValue(defIdx);
+    });
+  }
+
+  void _handleSetTermValue(String name, double value) {
     setState(() {
       _terms[name]!.value = value;
+      _terms[name]!.calcParam();
     });
   }
 
@@ -395,6 +461,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       _terms[name]!.value = -sum / _terms[name]!.weight;
+      _terms[name]!.calcParam();
       // TODO: 给值的更新添加颜色闪变? see: https://pub-web.flutter-io.cn/packages/flutter_animate
     });
   }

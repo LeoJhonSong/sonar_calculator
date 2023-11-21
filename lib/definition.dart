@@ -15,41 +15,42 @@ class Definition {
 }
 
 class DefinitionCard extends StatelessWidget {
-  final TextPainter textPainter;
-
-  final int maxParamLen;
   final List<Definition> definitions;
   final int definitionIdx;
-  final List<List<TextEditingController>> paramValueControllers;
+  final void Function(String paramName, double value) setDefParam;
+  final void Function() onCalcTermValue;
   const DefinitionCard({
     super.key,
-    required this.textPainter,
-    required this.maxParamLen,
     required this.definitions,
     required this.definitionIdx,
-    required this.paramValueControllers,
+    required this.setDefParam,
+    required this.onCalcTermValue,
   });
 
   @override
   Widget build(BuildContext context) {
+    Map<String, TextEditingController> paramValueControllers = {
+      for (String param in definitions[definitionIdx].params.keys)
+        param: TextEditingController()..text = (definitions[definitionIdx].params[param]!).toString()
+    };
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Row(
         children: [
-          // TextFields for each param in definitions[i]
-          for (int j = 0; j < definitions[definitionIdx].params.keys.length; j++)
+          // TextFields for each param in definitions[definitionIdx]
+          for (String param in definitions[definitionIdx].params.keys)
             Container(
-              margin: EdgeInsets.only(right: textPainter.width * 0.8),
-              width: textPainter.width * 7,
+              margin: const EdgeInsets.only(right: 10),
+              width: 70, // TODO: 输入框的宽度要想办法能动态
               child: TextField(
-                controller: paramValueControllers[definitionIdx][j],
+                controller: paramValueControllers[param],
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Theme.of(context).colorScheme.outlineVariant,
                   label: SizedBox(
-                      width: textPainter.width * 2.5,
-                      child: Math.tex(definitions[definitionIdx].params.keys.elementAt(j),
-                          textStyle: TextStyle(color: Theme.of(context).colorScheme.primary))),
+                    width: 20, // TODO: 参数名的字体肯定要变大, 这个宽度现在刚刚好, 所以肯定要变大
+                    child: Math.tex(param, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                  ),
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8), // Set your desired radius
@@ -58,7 +59,6 @@ class DefinitionCard extends StatelessWidget {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
-                // TODO: onSubmitted: ,
               ),
             ),
           const Spacer(),
@@ -70,7 +70,16 @@ class DefinitionCard extends StatelessWidget {
                 child: Math.tex(definitions[definitionIdx].eqn, textStyle: TextStyle(color: Theme.of(context).colorScheme.onTertiaryContainer)),
               ),
               child: FloatingActionButton.extended(
-                  onPressed: () => 0,
+                  onPressed: () {
+                    // TODO: 这个按钮删掉, 用上面输入框的submit
+                    for (String param in definitions[definitionIdx].params.keys) {
+                      String value = paramValueControllers[param]!.text;
+                      if (value.isNotEmpty) {
+                        setDefParam(param, double.parse(value));
+                      }
+                    }
+                    onCalcTermValue();
+                  },
                   foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
                   backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
                   label: Text(definitions[definitionIdx].desc))),

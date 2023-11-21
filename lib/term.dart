@@ -10,11 +10,15 @@ class Term {
   double value;
   Term({required this.name, required this.weight, required this.definitions, this.value = 0});
 
-  void calcParam(int defIdx) {
-    String firstKey = definitions[defIdx].params.keys.elementAt(0);
-    definitions[defIdx].params[firstKey] = definitions[defIdx].inv(value, definitions[defIdx].params);
+  /// 根据当前项的值反解出所有定义公式中第一个参数的值
+  void calcParam() {
+    for (int i = 0; i < definitions.length; i++) {
+      String defFirstParamName = definitions[i].params.keys.elementAt(0);
+      definitions[i].params[defFirstParamName] = definitions[i].inv(value, definitions[i].params);
+    }
   }
 
+  /// 由指定的定义公式计算当前项的值
   void calcValue(int defIdx) {
     value = definitions[defIdx].func(definitions[defIdx].params);
   }
@@ -25,15 +29,19 @@ class TermWidget extends StatelessWidget {
 
   final double value;
   final List<Definition> definitions;
-  final Function(String, double) onSetValue;
-  final Function(String) onSolve;
+  final void Function(String name, double value) onSetValue;
+  final void Function(String name) onSolve;
+  final void Function(String name, int defInx) onSetTermByDefIdx;
+  final void Function(String name, int defIdx, String paramName, double value) setDefParam;
   const TermWidget({
+    super.key,
     required this.name,
     required this.value,
     required this.onSetValue,
     required this.onSolve,
     required this.definitions,
-    super.key,
+    required this.onSetTermByDefIdx,
+    required this.setDefParam,
   });
 
   @override
@@ -48,10 +56,6 @@ class TermWidget extends StatelessWidget {
     final TextEditingController termValueController = TextEditingController();
     // Set the initial value.
     termValueController.text = value.toString();
-    List<List<TextEditingController>> paramValueControllers = [
-      for (Definition d in definitions) [for (String param in d.params.keys) TextEditingController()..text = (d.params[param]!).toString()]
-    ];
-    final int maxParamLen = [for (Definition d in definitions) d.params.length].reduce((current, next) => current > next ? current : next);
 
     return Flexible(
       child: SizedBox(
@@ -111,13 +115,13 @@ class TermWidget extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      for (int i = 0; i < definitions.length; i++)
+                      for (int defIdx = 0; defIdx < definitions.length; defIdx++)
                         DefinitionCard(
-                            textPainter: textPainter,
-                            maxParamLen: maxParamLen,
-                            definitions: definitions,
-                            definitionIdx: i,
-                            paramValueControllers: paramValueControllers),
+                          definitions: definitions,
+                          definitionIdx: defIdx,
+                          onCalcTermValue: () => onSetTermByDefIdx(name, defIdx),
+                          setDefParam: (paramName, value) => setDefParam(name, defIdx, paramName, value),
+                        ),
                     ],
                   ),
                 ),
