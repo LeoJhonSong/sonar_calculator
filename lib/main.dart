@@ -4,6 +4,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:equations/equations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 import 'color_schemes.g.dart';
 import 'definition.dart';
@@ -55,7 +56,7 @@ class ROCDialog extends StatelessWidget {
   Future<void> _rocDialogBuilder(BuildContext context) {
     return showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (context) {
           return AlertDialog(
             title: const Text('接收机工作特性曲线 (ROC曲线)'),
             content: Expanded(
@@ -283,75 +284,86 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
+                        // TODO: 关于页面, 给出参考文献列表, 这改为row
                         Text(
                           '声呐方程计算器',
                           style: Theme.of(context).textTheme.displayLarge,
                         ),
-                        const SizedBox(
-                          height: 40,
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // TODO: 换一下https://pub-web.flutter-io.cn/packages/toggle_switch
-                            Text(
-                              isPassive ? '主动' : '被动',
-                              style: Theme.of(context).textTheme.displaySmall,
-                            ),
-                            Switch(
-                              value: isPassive,
-                              onChanged: (value) {
-                                setState(() {
-                                  isPassive = value;
-                                });
-                              },
-                            ),
-                            // 设置f, c, B, t
-                            for (String paramName in knownParams.keys)
-                              Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: SizedBox(
-                                  width: 100,
-                                  child: TextField(
-                                    controller: TextEditingController()..text = knownParams[paramName]!.toString(),
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: Theme.of(context).colorScheme.outlineVariant,
-                                      label: Math.tex(paramName, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide.none,
-                                        borderRadius: BorderRadius.circular(8), // Set your desired radius
-                                      ),
-                                    ),
-                                    onSubmitted: (value) {
-                                      if (value.isNotEmpty) {
-                                        setState(() {
-                                          knownParams[paramName] = double.parse(value);
-                                        });
-                                      }
-                                    },
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            const ROCDialog(),
-                            // TODO: 关于页面, 给出参考文献列表
-                          ],
-                        ),
                         Expanded(
                           child: Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              // mainAxisSize: MainAxisSize.min,
                               children: [
-                                for (var i = 0; i < _terms.length; i++)
-                                  TermWidget(
-                                    name: _terms.values.elementAt(i).name,
-                                    value: _terms.values.elementAt(i).value,
-                                    onSolve: _handleSolve,
-                                    onSetValue: _handleSetValue,
-                                    definitions: _terms.values.elementAt(i).definitions,
+                                Expanded(
+                                  child: Align(
+                                    alignment: const Alignment(0, 0.8),
+                                    child: Row( // TODO: 提取这个widget
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        ToggleSwitch(
+                                          minHeight: 56,
+                                          initialLabelIndex: 0,
+                                          totalSwitches: 2,
+                                          activeBgColor: [Theme.of(context).colorScheme.primaryContainer],
+                                          activeFgColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                                          inactiveBgColor: Theme.of(context).colorScheme.outlineVariant,
+                                          inactiveFgColor: Theme.of(context).colorScheme.onSurface,
+                                          labels: const ['主动', '被动'],
+                                          onToggle: (index) {
+                                            setState(() {
+                                              isPassive = index == 0;
+                                            });
+                                          },
+                                        ),
+                                        // 设置f, c, B, t
+                                        for (String paramName in knownParams.keys)
+                                          Padding(
+                                            padding: const EdgeInsets.all(20),
+                                            child: SizedBox(
+                                              width: 100,
+                                              child: TextField(
+                                                controller: TextEditingController()..text = knownParams[paramName]!.toString(),
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  fillColor: Theme.of(context).colorScheme.outlineVariant,
+                                                  label: Math.tex(paramName, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                                                  border: OutlineInputBorder(
+                                                    borderSide: BorderSide.none,
+                                                    borderRadius: BorderRadius.circular(8), // Set your desired radius
+                                                  ),
+                                                ),
+                                                onSubmitted: (value) {
+                                                  if (value.isNotEmpty) {
+                                                    setState(() {
+                                                      knownParams[paramName] = double.parse(value);
+                                                    });
+                                                  }
+                                                },
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ),
+                                        const ROCDialog(),
+                                      ],
+                                    ),
                                   ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    for (var i = 0; i < _terms.length; i++)
+                                      TermWidget(
+                                        name: _terms.values.elementAt(i).name,
+                                        value: _terms.values.elementAt(i).value,
+                                        onSolve: _handleSolve,
+                                        onSetValue: _handleSetValue,
+                                        definitions: _terms.values.elementAt(i).definitions,
+                                      ),
+                                  ],
+                                ),
+                                const Spacer()
                               ],
                             ),
                           ),

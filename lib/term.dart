@@ -54,74 +54,77 @@ class TermWidget extends StatelessWidget {
     final int maxParamLen = [for (Definition d in definitions) d.params.length].reduce((current, next) => current > next ? current : next);
 
     return Flexible(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: textPainter.width * 8,
-                  child: TextField(
-                    controller: termValueController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.outlineVariant,
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(8), // Set your desired radius
+      child: SizedBox(
+        width: 325,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: textPainter.width * 8,
+                    child: TextField(
+                      controller: termValueController,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.outlineVariant,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(8), // Set your desired radius
+                        ),
                       ),
+                      onSubmitted: (value) {
+                        if (value.isNotEmpty) {
+                          onSetValue(name, double.parse(value));
+                        }
+                      },
+                      textAlign: TextAlign.center,
                     ),
-                    onSubmitted: (value) {
-                      if (value.isNotEmpty) {
-                        onSetValue(name, double.parse(value));
-                      }
-                    },
-                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () => onSolve(name),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => onSolve(name),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: Text(name,
+                        style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            )),
                   ),
-                  child: Text(name,
-                      style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          )),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                surfaceTintColor: Theme.of(context).colorScheme.surfaceVariant,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (int i = 0; i < definitions.length; i++)
-                      DefinitionCard(
-                          textPainter: textPainter,
-                          maxParamLen: maxParamLen,
-                          definitions: definitions,
-                          definitionIdx: i,
-                          paramValueControllers: paramValueControllers),
-                  ],
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  surfaceTintColor: Theme.of(context).colorScheme.surfaceVariant,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (int i = 0; i < definitions.length; i++)
+                        DefinitionCard(
+                            textPainter: textPainter,
+                            maxParamLen: maxParamLen,
+                            definitions: definitions,
+                            definitionIdx: i,
+                            paramValueControllers: paramValueControllers),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

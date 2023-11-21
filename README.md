@@ -79,3 +79,4 @@
 - [支持提示为widget的tooltip](https://pub.dev/packages/just_the_tooltip)
 - [自定义窗口样式](https://pub.dev/packages/bitsdojo_window)
 - [透明背景色支持](https://pub.dev/packages/flutter_acrylic) **Linux下不支持亚克力效果**
+- [多选一切换的开关](https://pub-web.flutter-io.cn/packages/toggle_switch)
