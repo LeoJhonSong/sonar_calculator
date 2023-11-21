@@ -11,20 +11,6 @@ import 'package:flutter/material.dart';
 /// This is a Flutter "Universal" Widget that only depends on the SDK and
 /// can be dropped into any application.
 class ListTileReveal extends StatefulWidget {
-  const ListTileReveal({
-    super.key,
-    this.title,
-    this.leading,
-    this.subtitle,
-    this.trailing,
-    this.contentPadding,
-    this.onTap,
-    this.dense,
-    this.enabled = true,
-    this.isOpen,
-    this.duration = const Duration(milliseconds: 200),
-  });
-
   /// A widget to display before the title.
   ///
   /// Typically an [Icon] or a [CircleAvatar] widget.
@@ -86,30 +72,26 @@ class ListTileReveal extends StatefulWidget {
   /// The duration of the show and hide animation of child.
   final Duration duration;
 
+  const ListTileReveal({
+    super.key,
+    this.title,
+    this.leading,
+    this.subtitle,
+    this.trailing,
+    this.contentPadding,
+    this.onTap,
+    this.dense,
+    this.enabled = true,
+    this.isOpen,
+    this.duration = const Duration(milliseconds: 200),
+  });
+
   @override
   State<ListTileReveal> createState() => _ListTileRevealState();
 }
 
 class _ListTileRevealState extends State<ListTileReveal> {
   late bool _isOpen;
-
-  @override
-  void initState() {
-    super.initState();
-    _isOpen = widget.isOpen ?? false;
-  }
-
-  @override
-  void didUpdateWidget(covariant ListTileReveal oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isOpen != oldWidget.isOpen) _isOpen = widget.isOpen ?? false;
-  }
-
-  void _handleTap() {
-    setState(() {
-      _isOpen = !_isOpen;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,5 +142,23 @@ class _ListTileRevealState extends State<ListTileReveal> {
         ),
       ],
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant ListTileReveal oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isOpen != oldWidget.isOpen) _isOpen = widget.isOpen ?? false;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _isOpen = widget.isOpen ?? false;
+  }
+
+  void _handleTap() {
+    setState(() {
+      _isOpen = !_isOpen;
+    });
   }
 }

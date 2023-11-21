@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
+
 import 'list_tile_reveal.dart';
 
 class Definition {
@@ -40,7 +41,6 @@ class DefinitionCard extends StatelessWidget {
           title: Text(definitions[definitionIdx].desc),
           subtitle: Scrollbar(
             controller: scrollController,
-            scrollbarOrientation: ScrollbarOrientation.bottom,
             child: SingleChildScrollView(
               controller: scrollController,
               scrollDirection: Axis.horizontal,

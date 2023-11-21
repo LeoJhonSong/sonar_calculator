@@ -25,7 +25,7 @@ void main() {
   ));
 
   doWhenWindowReady(() {
-    const initialSize = Size(2000, 1000);
+    const initialSize = Size(2000, 1080);
     appWindow.minSize = initialSize;
     appWindow.size = initialSize;
     appWindow.alignment = Alignment.center;
@@ -239,7 +239,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ]),
       'TS': Term(name: 'TS', weight: 1.0, definitions: [
         Definition(
-            eqn: r'\frac{a_1a_2}{4}\left|\begin{aligned}a_1a_2&=主曲率半径\\r&=距离\\k&=波数\end{aligned}\right| \left.\begin{aligned}ka_1,ka_2&\gg1\\ r&>a\end{aligned}\right.',
+            eqn:
+                r'\frac{a_1a_2}{4}\left|\begin{aligned}a_1a_2&=主曲率半径\\r&=距离\\k&=波数\end{aligned}\right| \left.\begin{aligned}ka_1,ka_2&\gg1\\ r&>a\end{aligned}\right.',
             desc: '凸面',
             params: {'a_1': 1.0, 'a_2': 1.0},
             func: (params) => params['a_1']! * params['a_2']! / 4,
@@ -318,6 +319,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final termScrollController = ScrollController();
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -353,56 +355,55 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Material(
                   color: Theme.of(context).colorScheme.surfaceVariant,
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        // TODO: 关于页面, 给出参考文献列表, 这改为row
-                        Text(
-                          '声呐方程计算器',
-                          style: Theme.of(context).textTheme.displayLarge,
-                        ),
-                        Expanded(
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              // mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Expanded(
-                                  child: Align(
-                                    alignment: const Alignment(0, 0.8),
-                                    child: SettingsRow(
-                                      colorScheme: colorScheme,
-                                      knownParams: knownParams,
-                                      isPassive: isPassive,
-                                      onSetParam: _handleSetParam,
-                                      onSetPassive: _handleSetPassive,
-                                    ),
+                      padding: const EdgeInsets.all(20.0),
+                      child: LayoutBuilder(builder: (context, constraints) {
+                        return Column(
+                          children: [
+                            // TODO: 关于页面, 给出参考文献列表, 这改为row
+                            Text(
+                              '声呐方程计算器',
+                              style: Theme.of(context).textTheme.displayLarge,
+                            ),
+                            SizedBox(
+                              height: pow(constraints.maxHeight, 1.2) * 0.05,
+                              child: Align(
+                                alignment: const Alignment(0, 0.7),
+                                child: SettingsRow(
+                                  colorScheme: colorScheme,
+                                  knownParams: knownParams,
+                                  isPassive: isPassive,
+                                  onSetParam: _handleSetParam,
+                                  onSetPassive: _handleSetPassive,
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: Scrollbar(
+                                controller: termScrollController,
+                                child: SingleChildScrollView(
+                                  controller: termScrollController,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      for (var i = 0; i < _terms.length; i++)
+                                        TermWidget(
+                                          name: _terms.values.elementAt(i).name,
+                                          value: _terms.values.elementAt(i).value,
+                                          onSolve: _handleSolve,
+                                          onSetValue: _handleSetTermValue,
+                                          definitions: _terms.values.elementAt(i).definitions,
+                                          onSetTermByDefIdx: _handleSetTermByDefIdx,
+                                          setDefParam: _handleSetDefParam,
+                                        ),
+                                    ],
                                   ),
                                 ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    for (var i = 0; i < _terms.length; i++)
-                                      TermWidget(
-                                        name: _terms.values.elementAt(i).name,
-                                        value: _terms.values.elementAt(i).value,
-                                        onSolve: _handleSolve,
-                                        onSetValue: _handleSetTermValue,
-                                        definitions: _terms.values.elementAt(i).definitions,
-                                        onSetTermByDefIdx: _handleSetTermByDefIdx,
-                                        setDefParam: _handleSetDefParam,
-                                      ),
-                                  ],
-                                ),
-                                const Spacer()
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                          ],
+                        );
+                      })),
                 ),
               ),
             ],
