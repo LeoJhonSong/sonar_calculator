@@ -203,17 +203,18 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isPassive = true;
   Map<String, double> knownParams = {
     // FIXME: 目前是通过给定默认初值的方式避免出错的, 但还是加上输入框的判断禁止填非正数比较好, 很多输入框都需要
-    'f': 1,
+    'f (kHz)': 1,
     'c': 1500,
     'B': 1,
     't': 1,
   };
   double alpha = 0;
+  double lambda = 0;
   late Map<String, Term> _terms;
 
   _MyHomePageState() {
-    double f2 = pow(knownParams['f']!, 2).toDouble();
-    alpha = 1.0936 * ((0.1 * f2 / (1 + f2)) + (40 * f2 / (4100 + f2)) + 2.75e-4 * f2 + 0.003);
+    alpha = _calcAlpha(knownParams['f (kHz)']!);
+    lambda = _calcLambda(knownParams['c']!, knownParams['f (kHz)']!);
     _terms = {
       'SL': Term(name: 'SL', weight: 1.0, definitions: [
         Definition.byParamNames(
@@ -225,14 +226,14 @@ class _MyHomePageState extends State<MyHomePage> {
       ]),
       'TL': Term(name: 'TL', weight: -2.0, definitions: [
         Definition.byParamNames(
-            eqn: r'20\lg r+\alpha r',
+            eqn: r'20\lg(1.0936r)+\alpha\times1.0936r\\\alpha=\frac{\frac{0.1f^2}{1+f^2}+\frac{40f^2}{4100+f^2}+2.75\times10^{-4}f^2+0.003}{1.0936}',
             desc: '浅海传播损失',
             paramNames: ['r'],
-            func: (params) => 20 * log10(params['r']!) + alpha * params['r']!,
+            func: (params) => 20 * log10(params['r']! * 1.0936) + alpha * params['r']! * 1.0936,
             inv: (result, params) {
               // FIXME: 可能需要先try
               // see: https://github.com/albertodev01/equations/blob/fdc6ebe1049ca53bc5dbda307da7ce43944214d3/example/flutter_example/lib/routes/nonlinear_page/nonlinear_results.dart#L48
-              final newton = Newton(function: '20*log(x)/log(10)+$alpha*x-$result', x0: 1.0);
+              final newton = Newton(function: '20*log(x*1.0936)/log(10)+$alpha*x*1.0936-$result', x0: 1.0);
               final solutions = newton.solve();
               return solutions.guesses.last;
             })
@@ -240,31 +241,31 @@ class _MyHomePageState extends State<MyHomePage> {
       'TS': Term(name: 'TS', weight: 1.0, definitions: [
         Definition(
             eqn:
-                r'\frac{a_1a_2}{4}\left|\begin{aligned}a_1a_2&=主曲率半径\\r&=距离\\k&=波数\end{aligned}\right| \left.\begin{aligned}ka_1,ka_2&\gg1\\ r&>a\end{aligned}\right.',
+                r'10\lg\frac{a_1a_2}{4}\left|\begin{aligned}a_1a_2&=主曲率半径\\r&=距离\\k&=波数\end{aligned}\right| \left.\begin{aligned}ka_1,ka_2&\gg1\\ r&>a\end{aligned}\right.',
             desc: '凸面',
             params: {'a_1': 1.0, 'a_2': 1.0},
-            func: (params) => params['a_1']! * params['a_2']! / 4,
-            inv: (result, params) => 4 * result / params['a_2']!),
+            func: (params) => 10 * log10(params['a_1']! * params['a_2']! / 4),
+            inv: (result, params) => pow(10, result/10) * 4 / params['a_2']!),
         Definition.byParamNames(
-            eqn: r'\frac{a^2}{4}, a=球半径',
+            eqn: r'20\lg\frac{a}{2}, a=球半径',
             desc: '大球',
             paramNames: ['a'],
-            func: (params) => pow(params['a']!, 2) / 4,
-            inv: (result, params) => pow(result * 4, 0.5).toDouble()),
+            func: (params) => 20 * log10(params['a']!/2),
+            inv: (result, params) => (pow(10, result / 20) * 2).toDouble()),
         Definition.byParamNames(
-            eqn: r'(\frac{A}{\lambda})^2',
+            eqn: r'20\lg\frac{A}{\lambda}',
             desc: '有限任意形状平板',
             paramNames: ['A'],
-            func: (params) => pow(params['A']! * knownParams['f']! / knownParams['c']!, 2).toDouble(),
-            inv: (result, params) => pow(result, 0.5) * knownParams['c']! / knownParams['f']!),
+            func: (params) => 20 * log10(params['A']! / lambda).toDouble(),
+            inv: (result, params) => pow(10, result / 20) * lambda),
       ]),
       'NL': Term(name: 'NL', weight: -1.0, definitions: [
         Definition.byParamNames(
             eqn: r'10\lg f^{-1.7}+6S+55+10\lg B',
             desc: '由海况',
             paramNames: ['S'],
-            func: (params) => 10 * log10(pow(knownParams['f']!, -1.7)) + 6 * params['S']! + 55 + 10 * log10(knownParams['B']!),
-            inv: (result, params) => ((result - 10 * log10(pow(knownParams['f']!, -1.7)) - 55 - 10 * log10(knownParams['B']!)) ~/ 6).toDouble())
+            func: (params) => 10 * log10(pow(knownParams['f (kHz)']!, -1.7)) + 6 * params['S']! + 55 + 10 * log10(knownParams['B']!),
+            inv: (result, params) => ((result - 10 * log10(pow(knownParams['f (kHz)']!, -1.7)) - 55 - 10 * log10(knownParams['B']!)) ~/ 6).toDouble())
       ]),
       'DI': Term(name: 'DI', weight: 1.0, definitions: [
         Definition(
@@ -283,14 +284,14 @@ class _MyHomePageState extends State<MyHomePage> {
             eqn: r'20\lg\frac{\pi D}{\lambda}',
             desc: '圆形活塞阵',
             params: {'D': 1.0},
-            func: (params) => 20 * log10(pi * params['D']! * knownParams['f']! / knownParams['c']!),
-            inv: (result, params) => pow(10, result / 20) * knownParams['c']! / knownParams['f']! / pi),
+            func: (params) => 20 * log10(pi * params['D']! /lambda),
+            inv: (result, params) => pow(10, result / 20) * lambda / pi),
         Definition(
             eqn: r'10\lg\frac{4\pi S}{\lambda^2}',
             desc: '矩形活塞阵',
             params: {'S': 1.0},
-            func: (params) => 10 * log10(4 * pi * params['S']! / pow(knownParams['f']! / knownParams['c']!, 2)),
-            inv: (result, params) => pow(10, result / 10) * pow(knownParams['c']! / knownParams['f']!, 2) / 4 / pi),
+            func: (params) => 10 * log10(4 * pi * params['S']! / pow(lambda, 2)),
+            inv: (result, params) => pow(10, result / 10) * pow(lambda, 2) / 4 / pi),
       ]),
       'DT': Term(name: 'DT', weight: -1.0, definitions: [
         Definition(
@@ -422,6 +423,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void _handleSetParam(String paramName, double value) {
     setState(() {
       knownParams[paramName] = value;
+      alpha = _calcAlpha(knownParams['f (kHz)']!);
+      lambda = _calcLambda(knownParams['c']!, knownParams['f (kHz)']!);
     });
   }
 
@@ -465,5 +468,14 @@ class _MyHomePageState extends State<MyHomePage> {
       _terms[name]!.calcParam();
       // TODO: 给值的更新添加颜色闪变? see: https://pub-web.flutter-io.cn/packages/flutter_animate
     });
+  }
+
+  double _calcAlpha(double f) {
+    double f2 = pow(f, 2).toDouble();
+    return ((0.1 * f2 / (1 + f2)) + (40 * f2 / (4100 + f2)) + 2.75e-4 * f2 + 0.003) / 1.0936;
+  }
+
+  double _calcLambda(double c, double fkHz) {
+    return c / fkHz / 1000;
   }
 }
