@@ -59,41 +59,39 @@ class ROCDialog extends StatelessWidget {
         builder: (context) {
           return AlertDialog(
             title: const Text('接收机工作特性曲线 (ROC曲线)'),
-            content: Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: SizedBox(
-                        height: 1000, // FIXME: 需要更大吗?
-                        width: 1000,
-                        child: ColorFiltered(
-                          colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurface, BlendMode.modulate),
-                          child: Image.asset(
-                            'assets/roc.png',
-                          ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: SizedBox(
+                      height: 1000, // FIXME: 需要更大吗?
+                      width: 1000,
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurface, BlendMode.modulate),
+                        child: Image.asset(
+                          'assets/roc.png',
                         ),
                       ),
                     ),
                   ),
-                  Card(
-                    // width: double.infinity,
-                    color: Theme.of(context).colorScheme.surface,
-                    surfaceTintColor: Theme.of(context).colorScheme.surfaceVariant,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        '水声原理-尤立克 图12.6: 接收机工作特性曲线 (ROC曲线)。p(FA)为虚警概率; p(D)为检测概率; 参数d为检测指数',
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                      ),
+                ),
+                Card(
+                  // width: double.infinity,
+                  color: Theme.of(context).colorScheme.surface,
+                  surfaceTintColor: Theme.of(context).colorScheme.surfaceVariant,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text(
+                      '水声原理-尤立克 图12.6: 接收机工作特性曲线 (ROC曲线)。p(FA)为虚警概率; p(D)为检测概率; 参数d为检测指数',
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                     ),
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             ),
             actions: <Widget>[
               TextButton(
