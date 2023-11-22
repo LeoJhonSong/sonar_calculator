@@ -224,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ]),
       'TL': Term(name: 'TL', weight: -2.0, definitions: [
         Definition.byParamNames(
-            eqn: r'20\lg(1.0936r)+\alpha\times1.0936r\\\alpha=\frac{\frac{0.1f^2}{1+f^2}+\frac{40f^2}{4100+f^2}+2.75\times10^{-4}f^2+0.003}{1.0936}',
+            eqn: r'\begin{aligned}&20\lg(1.0936r)+\alpha\times1.0936r,\\ &\alpha=\frac{\frac{0.1f^2}{1+f^2}+\frac{40f^2}{4100+f^2}+2.75\times10^{-4}f^2+0.003}{1.0936}\end{aligned}',
             desc: '浅海传播损失',
             paramNames: ['r'],
             func: (params) => 20 * log10(params['r']! * 1.0936) + alpha * params['r']! * 1.0936,
