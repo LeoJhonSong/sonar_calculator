@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:equations/equations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
+import 'auto_submit_text_field.dart';
 import 'color_schemes.g.dart';
 import 'definition.dart';
 import 'term.dart';
@@ -110,14 +110,12 @@ class ROCDialog extends StatelessWidget {
 }
 
 class SettingsRow extends StatelessWidget {
-  final ColorScheme colorScheme;
   final bool isPassive;
   final Map<String, double> knownParams;
   final void Function(bool isIndex0) onSetPassive;
   final void Function(String paramName, double value) onSetParam;
   const SettingsRow({
     super.key,
-    required this.colorScheme,
     required this.isPassive,
     required this.knownParams,
     required this.onSetPassive,
@@ -127,6 +125,7 @@ class SettingsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double paddingSize = 40;
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -152,23 +151,12 @@ class SettingsRow extends StatelessWidget {
               padding: EdgeInsets.only(right: paddingSize),
               child: SizedBox(
                 width: 100,
-                child: TextField(
-                  controller: TextEditingController()..text = knownParams[paramName]!.toString(),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.outlineVariant,
-                    label: Math.tex(paramName, textStyle: TextStyle(color: colorScheme.primary)),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(8), // Set your desired radius
-                    ),
-                  ),
-                  onSubmitted: (value) {
-                    if (value.isNotEmpty) {
-                      onSetParam(paramName, double.parse(value));
-                    }
-                  },
-                  textAlign: TextAlign.center,
+                child: ParamTextField(
+                  paramValue: knownParams[paramName]!,
+                  paramName: paramName,
+                  fillColor: Theme.of(context).colorScheme.outlineVariant,
+                  textColor: Theme.of(context).colorScheme.primary,
+                  onSubmitted: (text) => onSetParam(paramName, double.parse(text)),
                 ),
               ),
             ),
@@ -224,7 +212,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ]),
       'TL': Term(name: 'TL', weight: -2.0, definitions: [
         Definition.byParamNames(
-            eqn: r'\begin{aligned}&20\lg(1.0936r)+\alpha\times1.0936r,\\ &\alpha=\frac{\frac{0.1f^2}{1+f^2}+\frac{40f^2}{4100+f^2}+2.75\times10^{-4}f^2+0.003}{1.0936}\end{aligned}',
+            eqn:
+                r'\begin{aligned}&20\lg(1.0936r)+\alpha\times1.0936r,\\ &\alpha=\frac{\frac{0.1f^2}{1+f^2}+\frac{40f^2}{4100+f^2}+2.75\times10^{-4}f^2+0.003}{1.0936}\end{aligned}',
             desc: '浅海传播损失',
             paramNames: ['r'],
             func: (params) => 20 * log10(params['r']! * 1.0936) + alpha * params['r']! * 1.0936,
@@ -243,12 +232,12 @@ class _MyHomePageState extends State<MyHomePage> {
             desc: '凸面',
             params: {'a_1': 1.0, 'a_2': 1.0},
             func: (params) => 10 * log10(params['a_1']! * params['a_2']! / 4),
-            inv: (result, params) => pow(10, result/10) * 4 / params['a_2']!),
+            inv: (result, params) => pow(10, result / 10) * 4 / params['a_2']!),
         Definition.byParamNames(
             eqn: r'20\lg\frac{a}{2}, a=球半径',
             desc: '大球',
             paramNames: ['a'],
-            func: (params) => 20 * log10(params['a']!/2),
+            func: (params) => 20 * log10(params['a']! / 2),
             inv: (result, params) => (pow(10, result / 20) * 2).toDouble()),
         Definition.byParamNames(
             eqn: r'20\lg\frac{A}{\lambda}',
@@ -282,7 +271,7 @@ class _MyHomePageState extends State<MyHomePage> {
             eqn: r'20\lg\frac{\pi D}{\lambda}',
             desc: '圆形活塞阵',
             params: {'D': 1.0},
-            func: (params) => 20 * log10(pi * params['D']! /lambda),
+            func: (params) => 20 * log10(pi * params['D']! / lambda),
             inv: (result, params) => pow(10, result / 20) * lambda / pi),
         Definition(
             eqn: r'10\lg\frac{4\pi S}{\lambda^2}',
@@ -317,7 +306,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    ColorScheme colorScheme = Theme.of(context).colorScheme;
     final termScrollController = ScrollController();
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -368,7 +356,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Align(
                                 alignment: const Alignment(0, 0.7),
                                 child: SettingsRow(
-                                  colorScheme: colorScheme,
                                   knownParams: knownParams,
                                   isPassive: isPassive,
                                   onSetParam: _handleSetParam,
@@ -410,6 +397,15 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  double _calcAlpha(double f) {
+    double f2 = pow(f, 2).toDouble();
+    return ((0.1 * f2 / (1 + f2)) + (40 * f2 / (4100 + f2)) + 2.75e-4 * f2 + 0.003) / 1.0936;
+  }
+
+  double _calcLambda(double c, double fkHz) {
+    return c / fkHz / 1000;
   }
 
   void _handleSetDefParam(String name, int defIdx, String paramName, double value) {
@@ -466,14 +462,5 @@ class _MyHomePageState extends State<MyHomePage> {
       _terms[name]!.calcParam();
       // TODO: 给值的更新添加颜色闪变? see: https://pub-web.flutter-io.cn/packages/flutter_animate
     });
-  }
-
-  double _calcAlpha(double f) {
-    double f2 = pow(f, 2).toDouble();
-    return ((0.1 * f2 / (1 + f2)) + (40 * f2 / (4100 + f2)) + 2.75e-4 * f2 + 0.003) / 1.0936;
-  }
-
-  double _calcLambda(double c, double fkHz) {
-    return c / fkHz / 1000;
   }
 }

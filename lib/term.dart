@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'auto_submit_text_field.dart';
 import 'definition.dart';
 
 class Term {
@@ -53,9 +54,6 @@ class TermWidget extends StatelessWidget {
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
-    final TextEditingController termValueController = TextEditingController();
-    // Set the initial value.
-    termValueController.text = value.toString();
 
     return Flexible(
       child: SizedBox(
@@ -69,22 +67,11 @@ class TermWidget extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: textPainter.width * 8,
-                    child: TextField(
-                      controller: termValueController,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.outlineVariant,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(8), // Set your desired radius
-                        ),
-                      ),
-                      onSubmitted: (value) {
-                        if (value.isNotEmpty) {
-                          onSetValue(name, double.parse(value));
-                        }
-                      },
-                      textAlign: TextAlign.center,
+                    child: TermTextField(
+                      termName: name,
+                      termValue: value,
+                      fillColor: Theme.of(context).colorScheme.outlineVariant,
+                      onSubmitted: (text) => onSetValue(name, double.parse(text)),
                     ),
                   ),
                   const SizedBox(height: 10),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
+import 'auto_submit_text_field.dart';
 import 'list_tile_reveal.dart';
 
 class Definition {
@@ -30,10 +31,6 @@ class DefinitionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, TextEditingController> paramValueControllers = {
-      for (String param in definitions[definitionIdx].params.keys)
-        param: TextEditingController()..text = (definitions[definitionIdx].params[param]!).toString()
-    };
     final scrollController = ScrollController();
     return Column(
       children: [
@@ -59,27 +56,13 @@ class DefinitionCard extends StatelessWidget {
               List<Widget> list = [
                 for (String param in definitions[definitionIdx].params.keys) ...[
                   Expanded(
-                    child: TextField(
-                      controller: paramValueControllers[param],
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.outlineVariant,
-                        label: SizedBox(
-                          width: 20, // TODO: 参数名的字体肯定要变大, 这个宽度现在刚刚好, 所以肯定要变大
-                          child: Math.tex(param, textStyle: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(8), // Set your desired radius
-                        ),
-                      ),
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      onSubmitted: (value) {
-                        if (value.isNotEmpty) {
-                          setDefParam(param, double.parse(value));
-                        }
+                    child: DefParamTextField(
+                      defParamName: param,
+                      defParamValue: definitions[definitionIdx].params[param]!,
+                      fillColor: Theme.of(context).colorScheme.outlineVariant,
+                      textColor: Theme.of(context).colorScheme.primary,
+                      onSubmitted: (text) {
+                        setDefParam(param, double.parse(text));
                         onCalcTermValue();
                       },
                     ),
