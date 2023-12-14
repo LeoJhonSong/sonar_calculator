@@ -55,7 +55,44 @@
   - d检测指数由$检测概率p(D)和虚警概率p(FA)的ROC曲线给出$ *尤里克P299*<img src="README/image-20231027020229545.png" alt="image-20231027020229545"  />
 
 
+## 开发
 
+### 环境配置
+
+总结[官方环境配置文档](https://flutter.cn/docs/get-started/install), 需要做的有三步:
+
+1. 从[Flutter SDK 归档列表](https://flutter.cn/docs/release/archive)下到对应系统Stable channel最新版本的压缩包, 解压到想要的地方如`/home/[username]/local/flutter`或`C:\Users\[username]\Softwares\flutter`
+
+2. 在终端/Powershell进入到该文件夹路径后根据[在中国网络环境下使用 Flutter](https://flutter.cn/community/china)用对应系统的语法, 添加环境变量切换镜像源以及将flutter添加到`Path`
+   - Linux (如果使用zsh添加到如下的`~/.zshrc`, 如果使用bash则添加到`~/.bashrc`)
+
+     ```shell
+     cat <<EOT >> ~/.zshrc
+     export PUB_HOSTED_URL="https://pub.flutter-io.cn"
+     export FLUTTER_STORAGE_BASE_URL="https://storage.flutter-io.cn"
+     export PATH="$PWD/flutter/bin:\$PATH"
+     EOT
+     ```
+
+   - Windows
+
+     ```powershell
+     # 这段命令官方文档里没完全写对
+     $newPath = $pwd.PATH + "\bin\",$env:PATH -join ";"
+     [System.Environment]::SetEnvironmentVariable('Path',$newPath,'User')
+     [System.Environment]::SetEnvironmentVariable('PUB_HOSTED_URL','https://pub.flutter-io.cn','User')
+     [System.Environment]::SetEnvironmentVariable('FLUTTER_STORAGE_BASE_URL','https://storage.flutter-io.cn','User')
+     ```
+
+3. 打开一个新的终端执行`flutter doctor`下载dart并检查缺少依赖
+
+   - Linux: 根据提示添加依赖
+   - Windows: 从[其他 Windows 需要的内容](https://flutter.cn/docs/get-started/install/windows#additional-windows-requirements)下载安装Visual Studio生成工具 (只需安装**使用 C++ 的桌面开发**部分所有默认组件)
+
+### 构建应用
+
+- Linux: `flutter build linux`
+- Windows: `flutter build Windows`
 
 ## 参考资料
 
