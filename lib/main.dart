@@ -1,14 +1,13 @@
 import 'dart:math';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:equations/equations.dart';
 import 'package:flutter/material.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 import 'auto_submit_text_field.dart';
 import 'color_schemes.g.dart';
-import 'definition.dart';
 import 'term.dart';
+import 'terms_gen.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -126,6 +125,12 @@ class SettingsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     double paddingSize = 40;
     ColorScheme colorScheme = Theme.of(context).colorScheme;
+    Map<String, String> paramDisplayedNames = {
+      'f': '信号频率f (kHz)',
+      'c': '声速c (m/s)',
+      'B': '信号带宽B (Hz)',
+      't': '信号脉宽t (s)',
+    };
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -153,7 +158,7 @@ class SettingsRow extends StatelessWidget {
                 width: 100,
                 child: ParamTextField(
                   paramValue: knownParams[paramName]!,
-                  paramName: paramName,
+                  paramName: paramDisplayedNames[paramName]!,
                   fillColor: Theme.of(context).colorScheme.outlineVariant,
                   textColor: Theme.of(context).colorScheme.primary,
                   onSubmitted: (text) => onSetParam(paramName, double.parse(text)),
@@ -161,6 +166,7 @@ class SettingsRow extends StatelessWidget {
               ),
             ),
           const ROCDialog(),
+          // TODO: 参考文献列表 写法: [1] 《水声工程》(刘my主编, 浙江科学技术出版社, 2002)72页
         ],
       ),
     );
@@ -189,119 +195,23 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isPassive = true;
   Map<String, double> knownParams = {
     // FIXME: 目前是通过给定默认初值的方式避免出错的, 但还是加上输入框的判断禁止填非正数比较好, 很多输入框都需要
-    'f (kHz)': 1,
+    'f': 1,
     'c': 1500,
-    'B': 1,
+    'B': 1000,
     't': 1,
   };
-  double alpha = 0;
-  double lambda = 0;
+  Map<String, double> dependentParams = {
+    'alpha': 0,
+    'lambda': 0,
+  };
   late Map<String, Term> _terms;
 
   _MyHomePageState() {
-    alpha = _calcAlpha(knownParams['f (kHz)']!);
-    lambda = _calcLambda(knownParams['c']!, knownParams['f (kHz)']!);
-    _terms = {
-      'SL': Term(name: 'SL', weight: 1.0, definitions: [
-        Definition.byParamNames(
-            eqn: r'S_v+20\lg v',
-            desc: '由发射电压',
-            paramNames: ['v', 'S_v'],
-            func: (params) => params['S_v']! + 20 * log10(params['v']!),
-            inv: (result, params) => pow(10, (result - params['S_v']!) / 20).toDouble())
-      ]),
-      'TL': Term(name: 'TL', weight: -2.0, definitions: [
-        Definition.byParamNames(
-            eqn:
-                r'\begin{aligned}&20\lg(1.0936r)+\alpha\times1.0936r,\\ &\alpha=\frac{\frac{0.1f^2}{1+f^2}+\frac{40f^2}{4100+f^2}+2.75\times10^{-4}f^2+0.003}{1.0936}\end{aligned}',
-            desc: '浅海传播损失',
-            paramNames: ['r'],
-            func: (params) => 20 * log10(params['r']! * 1.0936) + alpha * params['r']! * 1.0936,
-            inv: (result, params) {
-              // FIXME: 可能需要先try
-              // see: https://github.com/albertodev01/equations/blob/fdc6ebe1049ca53bc5dbda307da7ce43944214d3/example/flutter_example/lib/routes/nonlinear_page/nonlinear_results.dart#L48
-              final newton = Newton(function: '20*log(x*1.0936)/log(10)+$alpha*x*1.0936-$result', x0: 1.0);
-              final solutions = newton.solve();
-              return solutions.guesses.last;
-            })
-      ]),
-      'TS': Term(name: 'TS', weight: 1.0, definitions: [
-        Definition(
-            eqn:
-                r'10\lg\frac{a_1a_2}{4}\left|\begin{aligned}a_1a_2&=主曲率半径\\r&=距离\\k&=波数\end{aligned}\right| \left.\begin{aligned}ka_1,ka_2&\gg1\\ r&>a\end{aligned}\right.',
-            desc: '凸面',
-            params: {'a_1': 1.0, 'a_2': 1.0},
-            func: (params) => 10 * log10(params['a_1']! * params['a_2']! / 4),
-            inv: (result, params) => pow(10, result / 10) * 4 / params['a_2']!),
-        Definition.byParamNames(
-            eqn: r'20\lg\frac{a}{2}, a=球半径',
-            desc: '大球',
-            paramNames: ['a'],
-            func: (params) => 20 * log10(params['a']! / 2),
-            inv: (result, params) => (pow(10, result / 20) * 2).toDouble()),
-        Definition.byParamNames(
-            eqn: r'20\lg\frac{A}{\lambda}',
-            desc: '有限任意形状平板',
-            paramNames: ['A'],
-            func: (params) => 20 * log10(params['A']! / lambda).toDouble(),
-            inv: (result, params) => pow(10, result / 20) * lambda),
-      ]),
-      'NL': Term(name: 'NL', weight: -1.0, definitions: [
-        Definition.byParamNames(
-            eqn: r'10\lg f^{-1.7}+6S+55+10\lg B',
-            desc: '由海况',
-            paramNames: ['S'],
-            func: (params) => 10 * log10(pow(knownParams['f (kHz)']!, -1.7)) + 6 * params['S']! + 55 + 10 * log10(knownParams['B']!),
-            inv: (result, params) => ((result - 10 * log10(pow(knownParams['f (kHz)']!, -1.7)) - 55 - 10 * log10(knownParams['B']!)) ~/ 6).toDouble())
-      ]),
-      'DI': Term(name: 'DI', weight: 1.0, definitions: [
-        Definition(
-            eqn: r'10\lg N',
-            desc: '线列阵',
-            params: {'N': 1.0},
-            func: (params) => 10 * log10(params['N']!),
-            inv: (result, params) => pow(10, result / 10).toDouble()),
-        Definition(
-            eqn: r'10\lg MN',
-            desc: '点源方形阵',
-            params: {'M': 1.0, 'N': 1.0},
-            func: (params) => 10 * log10(params['M']! * params['N']!),
-            inv: (result, params) => pow(10, result / 10) / params['N']!),
-        Definition(
-            eqn: r'20\lg\frac{\pi D}{\lambda}',
-            desc: '圆形活塞阵',
-            params: {'D': 1.0},
-            func: (params) => 20 * log10(pi * params['D']! / lambda),
-            inv: (result, params) => pow(10, result / 20) * lambda / pi),
-        Definition(
-            eqn: r'10\lg\frac{4\pi S}{\lambda^2}',
-            desc: '矩形活塞阵',
-            params: {'S': 1.0},
-            func: (params) => 10 * log10(4 * pi * params['S']! / pow(lambda, 2)),
-            inv: (result, params) => pow(10, result / 10) * pow(lambda, 2) / 4 / pi),
-      ]),
-      'DT': Term(name: 'DT', weight: -1.0, definitions: [
-        Definition(
-            eqn: r'10\lg\frac{d}{2t}',
-            desc: '互相关接收机',
-            params: {'d': 1.0},
-            func: (params) => 10 * log10(params['d']! / 2 / knownParams['t']!),
-            inv: (result, params) => pow(10, result / 10) * 2 * knownParams['t']!),
-        Definition(
-            eqn: r'5\lg\frac{d B}{t}',
-            desc: '平方律检测器',
-            params: {'d': 1.0},
-            func: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!),
-            inv: (result, params) => pow(10, result / 5) * knownParams['t']! / knownParams['B']!),
-        Definition(
-            eqn: r'5\lg\frac{d B}{t}+|5\lg\frac{T}{t}|',
-            desc: '平滑滤波器',
-            params: {'d': 1.0, 'T': 1.0},
-            func: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!) + (5 * log10(params['T']! / knownParams['t']!)).abs(),
-            inv: (result, params) =>
-                pow(10, (result - (5 * log10(params['T']! / knownParams['t']!)).abs()) / 5) * knownParams['t']! / knownParams['B']!)
-      ]),
-    };
+    _calcDependent();
+    _terms = termsGen(knownParams, dependentParams);
+    for (String name in _terms.keys) {
+      _terms[name]!.calcValue(0);
+    }
   }
 
   @override
@@ -399,13 +309,12 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  double _calcAlpha(double f) {
-    double f2 = pow(f, 2).toDouble();
-    return ((0.1 * f2 / (1 + f2)) + (40 * f2 / (4100 + f2)) + 2.75e-4 * f2 + 0.003) / 1.0936;
-  }
-
-  double _calcLambda(double c, double fkHz) {
-    return c / fkHz / 1000;
+  void _calcDependent() {
+    double c = knownParams['c']!;
+    double fkHz = knownParams['f']!;
+    double f2 = pow(fkHz, 2).toDouble();
+    dependentParams['alpha'] = ((0.1 * f2 / (1 + f2)) + (40 * f2 / (4100 + f2)) + 2.75e-4 * f2 + 0.003) / 1.0936;
+    dependentParams['lambda'] = c / fkHz / 1000;
   }
 
   void _handleSetDefParam(String name, int defIdx, String paramName, double value) {
@@ -417,8 +326,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _handleSetParam(String paramName, double value) {
     setState(() {
       knownParams[paramName] = value;
-      alpha = _calcAlpha(knownParams['f (kHz)']!);
-      lambda = _calcLambda(knownParams['c']!, knownParams['f (kHz)']!);
+      _calcDependent();
     });
   }
 
