@@ -155,7 +155,7 @@ class SettingsRow extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(right: paddingSize),
               child: SizedBox(
-                width: 100,
+                width: 120,
                 child: ParamTextField(
                   paramValue: knownParams[paramName]!,
                   paramName: paramDisplayedNames[paramName]!,
@@ -333,16 +333,15 @@ class _MyHomePageState extends State<MyHomePage> {
   void _handleSetPassive(bool isIndex0) {
     setState(() {
       isPassive = isIndex0;
-      // 在主动/被动声呐方程间切换
-      if (isPassive) {
+      if (isPassive) { // 切换为主动声呐方程
         _terms['TL']!.weight = -2;
         _terms['TS']!.weight = 1;
-      } else {
+      } else { // 切换为被动声呐方程
         _terms['TL']!.weight = -1;
         _terms['TS']!.weight = 0;
+        // TODO: Color filtered TS列
       }
     });
-    // TODO: Color filtered TS列
   }
 
   void _handleSetTermByDefIdx(String name, int defIdx) {

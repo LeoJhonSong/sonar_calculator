@@ -66,7 +66,7 @@ class TermWidget extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(
-                    width: textPainter.width * 8,
+                    width: textPainter.width * 16,
                     child: TermTextField(
                       termName: name,
                       termValue: value,
