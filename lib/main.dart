@@ -313,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
     double c = knownParams['c']!;
     double fkHz = knownParams['f']!;
     double f2 = pow(fkHz, 2).toDouble();
-    dependentParams['alpha'] = ((0.1 * f2 / (1 + f2)) + (40 * f2 / (4100 + f2)) + 2.75e-4 * f2 + 0.003) / 1.0936;
+    dependentParams['alpha'] = (0.11 * f2 / (1 + f2)) + (44 * f2 / (4100 + f2)) + 3e-4 * f2 + 0.0033;
     dependentParams['lambda'] = c / fkHz / 1000;
   }
 
