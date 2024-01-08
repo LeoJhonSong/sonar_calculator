@@ -198,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'f': 1,
     'c': 1500,
     'B': 1000,
-    't': 1,
+    't': 0.01,
   };
   Map<String, double> dependentParams = {
     'alpha': 0,
