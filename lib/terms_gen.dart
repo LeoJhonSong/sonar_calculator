@@ -26,13 +26,12 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
     'TL': Term(name: 'TL', weight: -2.0, definitions: [
       Definition(
           eqn: r'''\begin{matrix}
-            \boxed{\large{TL=20\lg r+60+\alpha r}}\\
+            \boxed{\large{TL=20\lg r+60+\alpha r}\ \textcolor{#75F8E2}{[1]}}\\
             \begin{aligned}
-              r:& 距离 (km). 扩展损失原本以m为单位,\\
-                & 补偿60进行单位转换\\
+              r:& 距离 (km)\\
               f:& 信号频率 (kHz)\\
               \alpha:&衰减系数(dB/km)\\
-                     &=\frac{0.11f^2}{1+f^2}+\frac{44f^2}{4100+f^2}+3\times10^{-4}f^2+0.0033.\\
+                     &=\frac{0.11f^2}{1+f^2}+\frac{44f^2}{4100+f^2}+3.025\times10^{-4}f^2+0.0033\ \textcolor{#75F8E2}{[2]}\\
                      &适用于0-500kHz声信号
             \end{aligned}\end{matrix}''',
           desc: '粗略传播损失',
@@ -47,11 +46,10 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
           })
     ]),
     'TS': Term(name: 'TS', weight: 1.0, definitions: [
-      //TODO: 单位
       Definition(
           eqn: r'''\begin{matrix}
             当垂直于表面入射且\left\{\begin{aligned}&ka_1,ka_2\gg 1\\&r>a\end{aligned}\right.\\
-            \boxed{\large{TS=10\lg\frac{a_1a_2}{4}}}\\
+            \boxed{\large{TS=10\lg\frac{a_1a_2}{4}}\ \textcolor{#75F8E2}{[3]}}\\
             \begin{aligned}
               a_1,a_2:& 主曲率半径(m)\\
               r:& 距离\\
@@ -64,7 +62,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
       Definition(
           eqn: r'''\begin{matrix}
             当\left\{\begin{aligned}&ka\gg 1\\&r>a\end{aligned}\right.\\
-            \boxed{\large{TS=20\lg\frac{a}{2}}}\\
+            \boxed{\large{TS=20\lg\frac{a}{2}}\ \textcolor{#75F8E2}{[3]}}\\
             \begin{aligned}
               a:& 球半径(m)\\
               r:& 距离\\
@@ -77,7 +75,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
       Definition(
           eqn: r'''\begin{matrix}
             当垂直于平板入射且r>\frac{L^2}{\lambda},kl\gg 1\\
-            \boxed{\large{TS=20\lg\frac{A}{\lambda}}}\\
+            \boxed{\large{TS=20\lg\frac{A}{\lambda}}\ \textcolor{#75F8E2}{[3]}}\\
             \begin{aligned}
               A:& 平板面积(m^2)\\
               L:& 平板最大线度\\
@@ -93,12 +91,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
     'NL': Term(name: 'NL', weight: -1.0, definitions: [
       Definition.byParamNames(
           eqn: r'''\begin{matrix}
-            \boxed{\large{TS=10\lg f^{-1.7}+6S+55+10\lg B}}\\
-            \begin{aligned}
-              &其中TS=10\lg f^{-1.7}+6S+55^{[?]}给出指定\\
-              &频点处环境噪声谱级, 加\lg B近似给出以f为\\
-              &中心的频段内总噪声谱级
-            \end{aligned}\\
+            \boxed{\large{TS=10\lg f^{-1.7}+6S+55+10\lg B}\ \textcolor{#75F8E2}{[4]}}\\
             \begin{aligned}
               S:& 海况, 范围0-9\\
               f:& 信号频率(kHz)\\
@@ -112,7 +105,8 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
     'DI': Term(name: 'DI', weight: 1.0, definitions: [
       Definition(
           eqn: r'''\begin{matrix}
-            \boxed{\large{DI=10\lg N}}\\
+            当d=\frac{n\lambda}{2}\\
+            \boxed{\large{DI=10\lg N}\ \textcolor{#75F8E2}{[5]}}\\
             \begin{aligned}
               N:& 阵元数
             \end{aligned}\end{matrix}''',
@@ -122,8 +116,8 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
           inv: (result, params) => pow(10, result / 10).toDouble()),
       Definition(
           eqn: r'''\begin{matrix}
-            当\left\{\begin{aligned}&d_1=\frac{n_1\lambda}{2}\\&d_2=\frac{n_2\lambda}{2}\end{aligned}\right.\\
-            \boxed{\large{DI=10\lg MN}}\\
+            当\left\{\begin{aligned}&d_1=\frac{m\lambda}{2}\\&d_2=\frac{n\lambda}{2}\end{aligned}\right.\\
+            \boxed{\large{DI=10\lg MN}\ \textcolor{#75F8E2}{[6]}}\\
             \begin{aligned}
               N:& 行阵元数\\
               M:& 列阵元数\\
@@ -137,7 +131,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
       Definition(
           eqn: r'''\begin{matrix}
             当D>2\lambda\\
-            \boxed{\large{DI=20\lg\frac{\pi D}{\lambda}}}\\
+            \boxed{\large{DI=20\lg\frac{\pi D}{\lambda}}\ \textcolor{#75F8E2}{[7]}}\\
             \begin{aligned}
               D:& 活塞阵直径(m)
             \end{aligned}\end{matrix}''',
@@ -148,7 +142,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
       Definition(
           eqn: r'''\begin{matrix}
             当a,b<2\lambda\\
-            \boxed{\large{DI=10\lg\frac{4\pi S}{\lambda^2}}}\\
+            \boxed{\large{DI=10\lg\frac{4\pi S}{\lambda^2}}\ \textcolor{#75F8E2}{[8]}}\\
             \begin{aligned}
               S:& 活塞阵面积(m^2)\\
               a:& 活塞阵宽度\\
@@ -164,7 +158,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
           eqn: r'''\begin{matrix}
             单水听器且信号波形准确已知时, 将\\
             波形时间函数与水听器信号互相关\\
-            \boxed{\large{DI=10\lg\frac{d}{2t}}}\\
+            \boxed{\large{DI=10\lg\frac{d}{2t}}\ \textcolor{#75F8E2}{[9]}}\\
             \begin{aligned}
               d:& 检测指数\\
               t:& 信号脉宽(s)\\
@@ -176,7 +170,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
       Definition(
           eqn: r'''\begin{matrix}
             将N个水听器信号两两互相关后相加\\
-            \boxed{\large{DI=5\lg\frac{dBN}{t(N-1)}\approx 5\lg\frac{dB}{t}}}\\
+            \boxed{\large{DI=5\lg\frac{dBN}{t(N-1)}\approx 5\lg\frac{dB}{t}}\ \textcolor{#75F8E2}{[9]}}\\
             \begin{aligned}
               d:& 检测指数\\
               N:& 阵元数\\
@@ -190,7 +184,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
       Definition(
           eqn: r'''\begin{matrix}
             信号未知时, 将N个水听器信号相加后自相关\\
-            \boxed{\large{DI=5\lg\frac{d B}{t}}}\\
+            \boxed{\large{DI=5\lg\frac{d B}{t}}\ \textcolor{#75F8E2}{[9]}}\\
             \begin{aligned}
               d:& 检测指数\\
               t:& 信号脉宽(s)\\
@@ -203,7 +197,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
       Definition(
           eqn: r'''\begin{matrix}
             在平方律检波器后以积分处理平滑滤波\\
-            \boxed{\large{DI=5\lg\frac{d B}{t}+\left|5\lg\frac{T}{t}\right|}}\\
+            \boxed{\large{DI=5\lg\frac{d B}{t}+\left|5\lg\frac{T}{t}\right|}\ \textcolor{#75F8E2}{[10]}}\\
             \begin{aligned}
               d:& 检测指数\\
               t:& 信号脉宽(s)\\

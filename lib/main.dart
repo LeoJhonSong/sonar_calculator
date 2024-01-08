@@ -6,6 +6,7 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 import 'auto_submit_text_field.dart';
 import 'color_schemes.g.dart';
+import 'references.dart';
 import 'term.dart';
 import 'terms_gen.dart';
 
@@ -48,7 +49,7 @@ class ROCDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: () => _rocDialogBuilder(context),
-      label: const Text('ROC曲线'), // FIXME: 需要改名吗
+      label: const Text('ROC曲线'),
     );
   }
 
@@ -65,7 +66,7 @@ class ROCDialog extends StatelessWidget {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: SizedBox(
-                      height: 1000, // FIXME: 需要更大吗?
+                      height: 1000,
                       width: 1000,
                       child: ColorFiltered(
                         colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurface, BlendMode.modulate),
@@ -83,7 +84,7 @@ class ROCDialog extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(10),
                     child: Text(
-                      '水声原理-尤立克 图12.6: 接收机工作特性曲线 (ROC曲线)。p(FA)为虚警概率; p(D)为检测概率; 参数d为检测指数',
+                      '水声原理-尤立克 图12.6: 接收机工作特性曲线 (ROC曲线)。p(FA)为虚警概率; p(D)为检测概率; 参数d为检测指数', //TODO: 补充说明这只是示例
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
@@ -166,7 +167,8 @@ class SettingsRow extends StatelessWidget {
               ),
             ),
           const ROCDialog(),
-          // TODO: 参考文献列表 写法: [1] 《水声工程》(刘my主编, 浙江科学技术出版社, 2002)72页
+          SizedBox(width: paddingSize),
+          const References(),
         ],
       ),
     );
@@ -194,7 +196,6 @@ class WindowButtons extends StatelessWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool isPassive = true;
   Map<String, double> knownParams = {
-    // FIXME: 目前是通过给定默认初值的方式避免出错的, 但还是加上输入框的判断禁止填非正数比较好, 很多输入框都需要
     'f': 1,
     'c': 1500,
     'B': 1000,
@@ -256,7 +257,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: LayoutBuilder(builder: (context, constraints) {
                         return Column(
                           children: [
-                            // TODO: 关于页面, 给出参考文献列表, 这改为row
                             Text(
                               '声呐方程计算器',
                               style: Theme.of(context).textTheme.displayLarge,
@@ -313,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
     double c = knownParams['c']!;
     double fkHz = knownParams['f']!;
     double f2 = pow(fkHz, 2).toDouble();
-    dependentParams['alpha'] = (0.11 * f2 / (1 + f2)) + (44 * f2 / (4100 + f2)) + 3e-4 * f2 + 0.0033;
+    dependentParams['alpha'] = (0.11 * f2 / (1 + f2)) + (44 * f2 / (4100 + f2)) + 3.025e-4 * f2 + 0.0033;
     dependentParams['lambda'] = c / fkHz / 1000;
   }
 
@@ -333,10 +333,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void _handleSetPassive(bool isIndex0) {
     setState(() {
       isPassive = isIndex0;
-      if (isPassive) { // 切换为主动声呐方程
+      if (isPassive) {
+        // 切换为主动声呐方程
         _terms['TL']!.weight = -2;
         _terms['TS']!.weight = 1;
-      } else { // 切换为被动声呐方程
+      } else {
+        // 切换为被动声呐方程
         _terms['TL']!.weight = -1;
         _terms['TS']!.weight = 0;
         // TODO: Color filtered TS列

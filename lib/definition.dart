@@ -43,7 +43,7 @@ class DefinitionCard extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: Math.tex(
                 definitions[definitionIdx].eqn,
-                textScaleFactor: 1.2, // TODO: 这个缩放比
+                textScaleFactor: 1.2,
                 textStyle: TextStyle(color: Theme.of(context).colorScheme.outline),
               ),
             ),

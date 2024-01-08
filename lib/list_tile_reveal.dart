@@ -132,7 +132,6 @@ class _ListTileRevealState extends State<ListTileReveal> {
               ? GestureDetector(
                   onTap: widget.enabled ? _handleTap : null,
                   child: Container(
-                    color: Colors.transparent, // FIXME: 不加颜色会导致点击无效
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                     child: Center(child: widget.subtitle),
