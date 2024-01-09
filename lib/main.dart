@@ -282,13 +282,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      for (var i = 0; i < _terms.length; i++)
+                                      for (MapEntry<String, Term> entry in _terms.entries)
                                         TermWidget(
-                                          name: _terms.values.elementAt(i).name,
-                                          value: _terms.values.elementAt(i).value,
+                                          enabled: entry.value.enabled,
+                                          name: entry.key,
+                                          value: entry.value.value,
                                           onSolve: _handleSolve,
                                           onSetValue: _handleSetTermValue,
-                                          definitions: _terms.values.elementAt(i).definitions,
+                                          definitions: entry.value.definitions,
                                           onSetTermByDefIdx: _handleSetTermByDefIdx,
                                           setDefParam: _handleSetDefParam,
                                         ),
@@ -337,11 +338,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // 切换为主动声呐方程
         _terms['TL']!.weight = -2;
         _terms['TS']!.weight = 1;
+        _terms['TS']!.enabled = true;
       } else {
         // 切换为被动声呐方程
         _terms['TL']!.weight = -1;
         _terms['TS']!.weight = 0;
-        // TODO: Color filtered TS列
+        _terms['TS']!.enabled = false;
       }
     });
   }
