@@ -224,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        margin: EdgeInsets.all((Platform.isLinux && maximized) ? 0 : 10),
+        margin: EdgeInsets.all((!Platform.isLinux || maximized) ? 0 : 10),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceVariant,
           border: Border.all(
@@ -238,10 +238,10 @@ class _MyHomePageState extends State<MyHomePage> {
               spreadRadius: 0.5,
             ),
           ],
-          borderRadius: BorderRadius.circular((Platform.isLinux && maximized)?0:15),
+          borderRadius: BorderRadius.circular((!Platform.isLinux || maximized)?0:15),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular((Platform.isLinux && maximized)?0:15),
+          borderRadius: BorderRadius.circular((!Platform.isLinux || maximized)?0:15),
           child: Column(
             children: [
               WindowTitleBarBox(
