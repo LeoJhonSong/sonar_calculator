@@ -9,6 +9,7 @@ import 'color_schemes.g.dart';
 import 'references.dart';
 import 'term.dart';
 import 'terms_gen.dart';
+import 'dart:io';
 
 void main() {
   runApp(MaterialApp(
@@ -22,7 +23,7 @@ void main() {
   ));
 
   doWhenWindowReady(() {
-    const initialSize = Size(2000, 1080);
+    const initialSize = Size(1800, 1000);
     appWindow.minSize = initialSize;
     appWindow.size = initialSize;
     appWindow.alignment = Alignment.center;
@@ -129,60 +130,62 @@ class SettingsRow extends StatelessWidget {
       'B': '信号带宽B (Hz)',
       't': '信号脉宽t (s)',
     };
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(right: paddingSize),
+          child: ToggleSwitch(
+            minHeight: 56,
+            initialLabelIndex: isPassive ? 0 : 1,
+            totalSwitches: 2,
+            activeBgColor: [colorScheme.primaryContainer],
+            activeFgColor: colorScheme.onPrimaryContainer,
+            inactiveBgColor: colorScheme.outlineVariant,
+            inactiveFgColor: colorScheme.inversePrimary,
+            labels: const ['主动', '被动'],
+            onToggle: (index) => onSetPassive(index == 0),
+          ),
+        ),
+        // 设置f, c, B, t
+        for (MapEntry<String, double> paramEntry in knownParams.entries)
           Padding(
             padding: EdgeInsets.only(right: paddingSize),
-            child: ToggleSwitch(
-              minHeight: 56,
-              initialLabelIndex: isPassive ? 0 : 1,
-              totalSwitches: 2,
-              activeBgColor: [colorScheme.primaryContainer],
-              activeFgColor: colorScheme.onPrimaryContainer,
-              inactiveBgColor: colorScheme.outlineVariant,
-              inactiveFgColor: colorScheme.inversePrimary,
-              labels: const ['主动', '被动'],
-              onToggle: (index) => onSetPassive(index == 0),
-            ),
-          ),
-          // 设置f, c, B, t
-          for (MapEntry<String, double> paramEntry in knownParams.entries)
-            Padding(
-              padding: EdgeInsets.only(right: paddingSize),
-              child: SizedBox(
-                width: 120,
-                child: ParamTextField(
-                  paramValue: paramEntry.value,
-                  paramName: paramDisplayedNames[paramEntry.key]!,
-                  fillColor: Theme.of(context).colorScheme.outlineVariant,
-                  textColor: Theme.of(context).colorScheme.primary,
-                  onSubmitted: (text) {
-                    knownParams[paramEntry.key] = double.parse(text);
-                    onUpdateDepParam();
-                  },
-                ),
+            child: SizedBox(
+              width: 120,
+              child: ParamTextField(
+                paramValue: paramEntry.value,
+                paramName: paramDisplayedNames[paramEntry.key]!,
+                fillColor: Theme.of(context).colorScheme.outlineVariant,
+                textColor: Theme.of(context).colorScheme.primary,
+                onSubmitted: (text) {
+                  knownParams[paramEntry.key] = double.parse(text);
+                  onUpdateDepParam();
+                },
               ),
             ),
-          const ROCDialog(),
-          SizedBox(width: paddingSize),
-          const References(),
-        ],
-      ),
+          ),
+        const ROCDialog(),
+        SizedBox(width: paddingSize),
+        const References(),
+      ],
     );
   }
 }
 
 class WindowButtons extends StatelessWidget {
-  const WindowButtons({super.key});
+  final void Function() onPressMaximize;
+  const WindowButtons({required this.onPressMaximize, super.key});
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         MinimizeWindowButton(colors: WindowButtonColors(iconNormal: Theme.of(context).colorScheme.outline)),
-        MaximizeWindowButton(colors: WindowButtonColors(iconNormal: Theme.of(context).colorScheme.outline)),
+        WindowButton(
+          colors: WindowButtonColors(iconNormal: Theme.of(context).colorScheme.outline),
+          iconBuilder: (buttonContext) => MaximizeIcon(color: buttonContext.iconColor),
+          onPressed: onPressMaximize,
+        ),
         CloseWindowButton(
             colors: WindowButtonColors(
           iconNormal: Theme.of(context).colorScheme.outline,
@@ -194,6 +197,7 @@ class WindowButtons extends StatelessWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool maximized = false;
   bool isPassive = true;
   Map<String, double> knownParams = {
     'f': 1,
@@ -206,7 +210,6 @@ class _MyHomePageState extends State<MyHomePage> {
     'lambda': 0,
   };
   late Map<String, Term> _terms;
-
   _MyHomePageState() {
     _calcDependent();
     _terms = termsGen(knownParams, dependentParams);
@@ -221,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        margin: const EdgeInsets.all(10),
+        margin: EdgeInsets.all((Platform.isLinux && maximized) ? 0 : 10),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceVariant,
           border: Border.all(
@@ -235,17 +238,17 @@ class _MyHomePageState extends State<MyHomePage> {
               spreadRadius: 0.5,
             ),
           ],
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular((Platform.isLinux && maximized)?0:15),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular((Platform.isLinux && maximized)?0:15),
           child: Column(
             children: [
               WindowTitleBarBox(
                 child: Row(
                   children: [
-                    Expanded(child: Material(color: Theme.of(context).colorScheme.surfaceVariant, child: MoveWindow())),
-                    const WindowButtons(),
+                    Expanded(child: Material(color: Theme.of(context).colorScheme.surfaceVariant, child: MoveWindow(onDoubleTap: _handleMaximizeOrRestore))),
+                    WindowButtons(onPressMaximize: _handleMaximizeOrRestore),
                   ],
                 ),
               ),
@@ -253,7 +256,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Material(
                   color: Theme.of(context).colorScheme.surfaceVariant,
                   child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(20),
                       child: LayoutBuilder(builder: (context, constraints) {
                         return Column(
                           children: [
@@ -262,9 +265,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               style: Theme.of(context).textTheme.displayLarge,
                             ),
                             SizedBox(
-                              height: pow(constraints.maxHeight, 1.2) * 0.05,
+                              height: pow(constraints.maxHeight / 1000, 1.8) * 120,
                               child: Align(
-                                alignment: const Alignment(0, 0.7),
+                                alignment: const Alignment(0, 0.65),
                                 child: SettingsRow(
                                   knownParams: knownParams,
                                   isPassive: isPassive,
@@ -315,6 +318,13 @@ class _MyHomePageState extends State<MyHomePage> {
     double f2 = pow(fkHz, 2).toDouble();
     dependentParams['alpha'] = (0.11 * f2 / (1 + f2)) + (44 * f2 / (4100 + f2)) + 3.025e-4 * f2 + 0.0033;
     dependentParams['lambda'] = c / fkHz / 1000;
+  }
+
+  void _handleMaximizeOrRestore() {
+    setState(() {
+      appWindow.maximizeOrRestore();
+      maximized = !maximized;
+    });
   }
 
   void _handleSetPassive(bool isIndex0) {

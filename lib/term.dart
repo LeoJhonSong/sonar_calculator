@@ -74,7 +74,7 @@ class TermWidget extends StatelessWidget {
 
     return Flexible(
       child: SizedBox(
-        width: 400, // TermWidget的最大宽度
+        width: 450, // TermWidget的最大宽度
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
