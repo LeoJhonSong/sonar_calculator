@@ -8,25 +8,28 @@ class Definition {
   String eqn;
   String desc;
   Map<String, double> params;
-  double Function(Map<String, double> params) func;
+  double Function(Map<String, double> params) funcHandler;
   double Function(double result, Map<String, double> params) inv;
-  Definition({required this.eqn, required this.desc, required this.params, required this.func, required this.inv});
+  Definition({required this.eqn, required this.desc, required this.params, required this.funcHandler, required this.inv});
 
-  Definition.byParamNames({required this.eqn, required this.desc, required List<String> paramNames, required this.func, required this.inv})
-      : params = {for (String paramName in paramNames) paramName: 0.0};
+  Definition.byParamNames({
+    required this.eqn,
+    required this.desc,
+    required List<String> paramNames,
+    required this.funcHandler,
+    required this.inv,
+  }) : params = {for (String paramName in paramNames) paramName: 0.0};
+
+  double func() => funcHandler(params);
 }
 
 class DefinitionCard extends StatelessWidget {
-  final List<Definition> definitions;
-  final int definitionIdx;
-  final void Function(String paramName, double value) setDefParam;
-  final void Function() onCalcTermValue;
+  final Definition definition;
+  final void Function(double value) onSetTermValue;
   const DefinitionCard({
     super.key,
-    required this.definitions,
-    required this.definitionIdx,
-    required this.setDefParam,
-    required this.onCalcTermValue,
+    required this.definition,
+    required this.onSetTermValue,
   });
 
   @override
@@ -35,14 +38,14 @@ class DefinitionCard extends StatelessWidget {
     return Column(
       children: [
         ListTileReveal(
-          title: Text(definitions[definitionIdx].desc),
+          title: Text(definition.desc),
           subtitle: Scrollbar(
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
               scrollDirection: Axis.horizontal,
               child: Math.tex(
-                definitions[definitionIdx].eqn,
+                definition.eqn,
                 textScaleFactor: 1.2,
                 textStyle: TextStyle(color: Theme.of(context).colorScheme.outline),
               ),
@@ -54,16 +57,16 @@ class DefinitionCard extends StatelessWidget {
           child: Row(
             children: () {
               List<Widget> list = [
-                for (String param in definitions[definitionIdx].params.keys) ...[
+                for (MapEntry<String, double> paramEntry in definition.params.entries) ...[
                   Expanded(
                     child: DefParamTextField(
-                      defParamName: param,
-                      defParamValue: definitions[definitionIdx].params[param]!,
+                      defParamName: paramEntry.key,
+                      defParamValue: paramEntry.value,
                       fillColor: Theme.of(context).colorScheme.outlineVariant,
                       textColor: Theme.of(context).colorScheme.primary,
                       onSubmitted: (text) {
-                        setDefParam(param, double.parse(text));
-                        onCalcTermValue();
+                        definition.params[paramEntry.key] = double.parse(text);
+                        onSetTermValue(definition.func());
                       },
                     ),
                   ),

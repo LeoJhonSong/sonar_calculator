@@ -36,15 +36,10 @@ class Term {
 
   /// 根据当前项的值反解出所有定义公式中第一个参数的值
   void calcParam() {
-    for (int i = 0; i < definitions.length; i++) {
-      String defFirstParamName = definitions[i].params.keys.elementAt(0);
-      definitions[i].params[defFirstParamName] = definitions[i].inv(value, definitions[i].params);
+    for (Definition definition in definitions) {
+      String defFirstParamName = definition.params.keys.elementAt(0);
+      definition.params[defFirstParamName] = definition.inv(value, definition.params);
     }
-  }
-
-  /// 由指定的定义公式计算当前项的值
-  void calcValue(int defIdx) {
-    value = definitions[defIdx].func(definitions[defIdx].params);
   }
 }
 
@@ -55,8 +50,7 @@ class TermWidget extends StatelessWidget {
   final List<Definition> definitions;
   final void Function(String name, double value) onSetValue;
   final void Function(String name) onSolve;
-  final void Function(String name, int defInx) onSetTermByDefIdx;
-  final void Function(String name, int defIdx, String paramName, double value) setDefParam;
+  final void Function(String name, double value) onSetTermByDef;
   const TermWidget({
     super.key,
     required this.enabled,
@@ -65,8 +59,7 @@ class TermWidget extends StatelessWidget {
     required this.onSetValue,
     required this.onSolve,
     required this.definitions,
-    required this.onSetTermByDefIdx,
-    required this.setDefParam,
+    required this.onSetTermByDef,
   });
 
   @override
@@ -137,12 +130,10 @@ class TermWidget extends StatelessWidget {
                           context: context,
                           color: Theme.of(context).colorScheme.outlineVariant,
                           tiles: [
-                            for (int defIdx = 0; defIdx < definitions.length; defIdx++)
+                            for (Definition definition in definitions)
                               DefinitionCard(
-                                definitions: definitions,
-                                definitionIdx: defIdx,
-                                onCalcTermValue: () => onSetTermByDefIdx(name, defIdx),
-                                setDefParam: (paramName, value) => setDefParam(name, defIdx, paramName, value),
+                                definition: definition,
+                                onSetTermValue: (value) => onSetTermByDef(name, value),
                               ),
                           ],
                         ).toList()),

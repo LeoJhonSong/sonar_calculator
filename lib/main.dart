@@ -13,10 +13,7 @@ import 'terms_gen.dart';
 void main() {
   runApp(MaterialApp(
     title: '声呐方程计算器',
-    theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme
-        // TODO: 适配高分屏缩放
-        ),
-    darkTheme: ThemeData(
+    theme: ThemeData(
       useMaterial3: true,
       colorScheme: darkColorScheme,
     ),
@@ -113,13 +110,13 @@ class SettingsRow extends StatelessWidget {
   final bool isPassive;
   final Map<String, double> knownParams;
   final void Function(bool isIndex0) onSetPassive;
-  final void Function(String paramName, double value) onSetParam;
+  final void Function() onUpdateDepParam;
   const SettingsRow({
     super.key,
     required this.isPassive,
     required this.knownParams,
     required this.onSetPassive,
-    required this.onSetParam,
+    required this.onUpdateDepParam,
   });
 
   @override
@@ -152,17 +149,20 @@ class SettingsRow extends StatelessWidget {
             ),
           ),
           // 设置f, c, B, t
-          for (String paramName in knownParams.keys)
+          for (MapEntry<String, double> paramEntry in knownParams.entries)
             Padding(
               padding: EdgeInsets.only(right: paddingSize),
               child: SizedBox(
                 width: 120,
                 child: ParamTextField(
-                  paramValue: knownParams[paramName]!,
-                  paramName: paramDisplayedNames[paramName]!,
+                  paramValue: paramEntry.value,
+                  paramName: paramDisplayedNames[paramEntry.key]!,
                   fillColor: Theme.of(context).colorScheme.outlineVariant,
                   textColor: Theme.of(context).colorScheme.primary,
-                  onSubmitted: (text) => onSetParam(paramName, double.parse(text)),
+                  onSubmitted: (text) {
+                    knownParams[paramEntry.key] = double.parse(text);
+                    onUpdateDepParam();
+                  },
                 ),
               ),
             ),
@@ -210,8 +210,8 @@ class _MyHomePageState extends State<MyHomePage> {
   _MyHomePageState() {
     _calcDependent();
     _terms = termsGen(knownParams, dependentParams);
-    for (String name in _terms.keys) {
-      _terms[name]!.calcValue(0);
+    for (MapEntry<String, Term> termEntry in _terms.entries) {
+      termEntry.value.value = termEntry.value.definitions[0].func();
     }
   }
 
@@ -268,7 +268,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 child: SettingsRow(
                                   knownParams: knownParams,
                                   isPassive: isPassive,
-                                  onSetParam: _handleSetParam,
+                                  onUpdateDepParam: _handleUpdateDepParam,
                                   onSetPassive: _handleSetPassive,
                                 ),
                               ),
@@ -282,16 +282,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      for (MapEntry<String, Term> entry in _terms.entries)
+                                      for (MapEntry<String, Term> termEntry in _terms.entries)
                                         TermWidget(
-                                          enabled: entry.value.enabled,
-                                          name: entry.key,
-                                          value: entry.value.value,
+                                          enabled: termEntry.value.enabled,
+                                          name: termEntry.key,
+                                          value: termEntry.value.value,
                                           onSolve: _handleSolve,
                                           onSetValue: _handleSetTermValue,
-                                          definitions: entry.value.definitions,
-                                          onSetTermByDefIdx: _handleSetTermByDefIdx,
-                                          setDefParam: _handleSetDefParam,
+                                          definitions: termEntry.value.definitions,
+                                          onSetTermByDef: _handleSetTermByDef,
                                         ),
                                     ],
                                   ),
@@ -318,19 +317,6 @@ class _MyHomePageState extends State<MyHomePage> {
     dependentParams['lambda'] = c / fkHz / 1000;
   }
 
-  void _handleSetDefParam(String name, int defIdx, String paramName, double value) {
-    setState(() {
-      _terms[name]!.definitions[defIdx].params[paramName] = value;
-    });
-  }
-
-  void _handleSetParam(String paramName, double value) {
-    setState(() {
-      knownParams[paramName] = value;
-      _calcDependent();
-    });
-  }
-
   void _handleSetPassive(bool isIndex0) {
     setState(() {
       isPassive = isIndex0;
@@ -348,9 +334,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _handleSetTermByDefIdx(String name, int defIdx) {
+  void _handleSetTermByDef(String name, double value) {
     setState(() {
-      _terms[name]!.calcValue(defIdx);
+      _terms[name]!.value = value;
     });
   }
 
@@ -364,14 +350,20 @@ class _MyHomePageState extends State<MyHomePage> {
   void _handleSolve(String name) {
     setState(() {
       double sum = 0.0;
-      for (var i = 0; i < _terms.length; i++) {
-        if (_terms.keys.elementAt(i) != name) {
-          sum = sum + _terms.values.elementAt(i).weight * _terms.values.elementAt(i).value;
+      for (MapEntry termEntry in _terms.entries) {
+        if (termEntry.key != name) {
+          sum = sum + termEntry.value.weight * termEntry.value.value;
         }
       }
       _terms[name]!.value = -sum / _terms[name]!.weight;
       _terms[name]!.calcParam();
       // TODO: 给值的更新添加颜色闪变? see: https://pub-web.flutter-io.cn/packages/flutter_animate
+    });
+  }
+
+  void _handleUpdateDepParam() {
+    setState(() {
+      _calcDependent();
     });
   }
 }

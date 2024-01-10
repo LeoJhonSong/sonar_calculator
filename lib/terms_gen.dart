@@ -20,7 +20,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '由发射电压',
           params: {'v': 1, 'S_v': 0},
-          func: (params) => params['S_v']! + 20 * log10(params['v']!),
+          funcHandler: (params) => params['S_v']! + 20 * log10(params['v']!),
           inv: (result, params) => pow(10, (result - params['S_v']!) / 20).toDouble())
     ]),
     'TL': Term(name: 'TL', weight: -2.0, definitions: [
@@ -36,7 +36,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '粗略传播损失',
           params: {'r': 1},
-          func: (params) => 20 * log10(params['r']!) + 60 + dependentParams['alpha']! * params['r']!,
+          funcHandler: (params) => 20 * log10(params['r']!) + 60 + dependentParams['alpha']! * params['r']!,
           inv: (result, params) {
             // FIXME: 可能需要先try
             // see: https://github.com/albertodev01/equations/blob/fdc6ebe1049ca53bc5dbda307da7ce43944214d3/example/flutter_example/lib/routes/nonlinear_page/nonlinear_results.dart#L48
@@ -57,7 +57,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '凸面',
           params: {'a_1': 1, 'a_2': 1},
-          func: (params) => 10 * log10(params['a_1']! * params['a_2']! / 4),
+          funcHandler: (params) => 10 * log10(params['a_1']! * params['a_2']! / 4),
           inv: (result, params) => pow(10, result / 10) * 4 / params['a_2']!),
       Definition(
           eqn: r'''\begin{matrix}
@@ -70,7 +70,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '大球',
           params: {'a': 1},
-          func: (params) => 20 * log10(params['a']! / 2),
+          funcHandler: (params) => 20 * log10(params['a']! / 2),
           inv: (result, params) => (pow(10, result / 20) * 2).toDouble()),
       Definition(
           eqn: r'''\begin{matrix}
@@ -85,7 +85,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '有限任意形状平板',
           params: {'A': 1},
-          func: (params) => 20 * log10(params['A']! / dependentParams['lambda']!).toDouble(),
+          funcHandler: (params) => 20 * log10(params['A']! / dependentParams['lambda']!).toDouble(),
           inv: (result, params) => pow(10, result / 20) * dependentParams['lambda']!),
     ]),
     'NL': Term(name: 'NL', weight: -1.0, definitions: [
@@ -99,7 +99,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '由海况(浅海)',
           paramNames: ['S'],
-          func: (params) => -17 * log10(knownParams['f']!) + 6 * params['S']! + 55 + 10 * log10(knownParams['B']!),
+          funcHandler: (params) => -17 * log10(knownParams['f']!) + 6 * params['S']! + 55 + 10 * log10(knownParams['B']!),
           inv: (result, params) => ((result + 17 * log10(knownParams['f']!) - 55 - 10 * log10(knownParams['B']!)) ~/ 6).toDouble())
     ]),
     'DI': Term(name: 'DI', weight: 1.0, definitions: [
@@ -112,7 +112,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '线列阵',
           params: {'N': 1},
-          func: (params) => 10 * log10(params['N']!),
+          funcHandler: (params) => 10 * log10(params['N']!),
           inv: (result, params) => pow(10, result / 10).toDouble()),
       Definition(
           eqn: r'''\begin{matrix}
@@ -126,7 +126,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '点源方形阵',
           params: {'M': 1, 'N': 1},
-          func: (params) => 10 * log10(params['M']! * params['N']!),
+          funcHandler: (params) => 10 * log10(params['M']! * params['N']!),
           inv: (result, params) => pow(10, result / 10) / params['N']!),
       Definition(
           eqn: r'''\begin{matrix}
@@ -137,7 +137,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '圆形活塞阵',
           params: {'D': 1},
-          func: (params) => 20 * log10(pi * params['D']! / dependentParams['lambda']!),
+          funcHandler: (params) => 20 * log10(pi * params['D']! / dependentParams['lambda']!),
           inv: (result, params) => pow(10, result / 20) * dependentParams['lambda']! / pi),
       Definition(
           eqn: r'''\begin{matrix}
@@ -150,7 +150,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '矩形活塞阵',
           params: {'S': 1},
-          func: (params) => 10 * log10(4 * pi * params['S']! / pow(dependentParams['lambda']!, 2)),
+          funcHandler: (params) => 10 * log10(4 * pi * params['S']! / pow(dependentParams['lambda']!, 2)),
           inv: (result, params) => pow(10, result / 10) * pow(dependentParams['lambda']!, 2) / 4 / pi),
     ]),
     'DT': Term(name: 'DT', weight: -1.0, definitions: [
@@ -165,7 +165,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '匹配(互相关)接收机',
           params: {'d': 1},
-          func: (params) => 10 * log10(params['d']! / 2 / knownParams['t']!),
+          funcHandler: (params) => 10 * log10(params['d']! / 2 / knownParams['t']!),
           inv: (result, params) => pow(10, result / 10) * 2 * knownParams['t']!),
       Definition(
           eqn: r'''\begin{matrix}
@@ -179,7 +179,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '互相关器',
           params: {'d': 1},
-          func: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!),
+          funcHandler: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!),
           inv: (result, params) => pow(10, result / 5) * knownParams['t']! / knownParams['B']!),
       Definition(
           eqn: r'''\begin{matrix}
@@ -192,7 +192,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '平方律(自相关)检波器',
           params: {'d': 1},
-          func: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!),
+          funcHandler: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!),
           inv: (result, params) => pow(10, result / 5) * knownParams['t']! / knownParams['B']!),
       Definition(
           eqn: r'''\begin{matrix}
@@ -206,7 +206,7 @@ Map<String, Term> termsGen(Map<String, double> knownParams, Map<String, double> 
             \end{aligned}\end{matrix}''',
           desc: '积分处理的平方律检波器',
           params: {'d': 1, 'T': 0.01},
-          func: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!) + (5 * log10(params['T']! / knownParams['t']!)).abs(),
+          funcHandler: (params) => 5 * log10(params['d']! * knownParams['B']! / knownParams['t']!) + (5 * log10(params['T']! / knownParams['t']!)).abs(),
           inv: (result, params) =>
               pow(10, (result - (5 * log10(params['T']! / knownParams['t']!)).abs()) / 5) * knownParams['t']! / knownParams['B']!)
     ]),
