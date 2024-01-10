@@ -63,7 +63,7 @@ class DefParamTextField extends AutoSubmitTextField {
             filled: true,
             fillColor: fillColor,
             label: SizedBox(
-              width: 20, // TODO: 参数名的字体肯定要变大, 这个宽度现在刚刚好, 所以肯定要变大
+              width: 20,
               child: Math.tex(defParamName, textStyle: TextStyle(color: textColor)),
             ),
             border: OutlineInputBorder(

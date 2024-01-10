@@ -56,7 +56,7 @@ class ROCDialog extends StatelessWidget {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('接收机工作特性曲线 (ROC曲线)'),
+            title: const Text('典型接收机工作特性曲线 (ROC曲线)'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -76,19 +76,28 @@ class ROCDialog extends StatelessWidget {
                   ),
                 ),
                 Card(
-                  // width: double.infinity,
                   color: Theme.of(context).colorScheme.surface,
                   surfaceTintColor: Theme.of(context).colorScheme.surfaceVariant,
                   child: Padding(
                     padding: const EdgeInsets.all(10),
-                    child: Text(
-                      '水声原理-尤立克 图12.6: 接收机工作特性曲线 (ROC曲线)。p(FA)为虚警概率; p(D)为检测概率; 参数d为检测指数', //TODO: 补充说明这只是示例
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                    child: Column(
+                      children: [
+                        Text(
+                          '水声原理-尤立克 图12.6: 接收机工作特性曲线 (ROC曲线)。p(FA)为虚警概率; p(D)为检测概率; 参数d为检测指数.',
+                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                        ),
+                        Text(
+                          '*当系统输出为具有不同的概率密度分布函数的噪声和具有不同的概率密度分布函数的信号加噪声时, 接收机的ROC是不同的.',
+                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                        ),
+                      ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
             actions: <Widget>[
