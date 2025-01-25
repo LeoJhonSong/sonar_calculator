@@ -9,7 +9,8 @@ import 'color_schemes.g.dart';
 import 'references.dart';
 import 'term.dart';
 import 'terms_gen.dart';
-import 'dart:io';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() {
   runApp(MaterialApp(
@@ -233,7 +234,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        margin: EdgeInsets.all((!Platform.isLinux || maximized) ? 0 : 10),
+        margin: EdgeInsets.all((kIsWeb || !Platform.isLinux || maximized) ? 0 : 10),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceVariant,
           border: Border.all(
@@ -247,10 +248,10 @@ class _MyHomePageState extends State<MyHomePage> {
               spreadRadius: 0.5,
             ),
           ],
-          borderRadius: BorderRadius.circular((!Platform.isLinux || maximized)?0:15),
+          borderRadius: BorderRadius.circular((kIsWeb || !Platform.isLinux || maximized) ? 0 : 15),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular((!Platform.isLinux || maximized)?0:15),
+          borderRadius: BorderRadius.circular((kIsWeb || !Platform.isLinux || maximized) ? 0 : 15),
           child: Column(
             children: [
               WindowTitleBarBox(
