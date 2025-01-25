@@ -1,5 +1,7 @@
 # sonar_calculator
 
+可以在[这个地址](https://leojhonsong.github.io/sonar_calculator/)使用声呐方程计算器的Web版.
+
 ## 需求
 
 [思维导图](https://docs.qq.com/mind/DY01GakVYcFlJdnFj?u=91afc42b08304211b09fd88daf9c0b43)
@@ -38,6 +40,8 @@
   <img src="README/image-20231026215022847.png" alt="image-20231026215022847"  />
 
 - $NL=10\lg f^{-1.7}+6S+55+10\lg B$ *刘伯胜P249公式7.20c用海况表示的浅海噪声谱级 (加上带内噪声)* **$f$单位kHz**
+
+  ⚠️更实际的深海噪声谱应由Wenz谱级给出.
 
 - DI=
   | 型式         | AG                                             | 符号                             | 条件                                                | 参考文献                                            |
